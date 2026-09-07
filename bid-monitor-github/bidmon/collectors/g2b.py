@@ -65,24 +65,28 @@ class G2BCollector(BaseCollector):
         if inst:
             params["ntceInsttNm"] = inst
         last_err = ""
-        for attempt in range(3):
+        # 해외(GitHub) 에서 조달청 API 접속이 간헐적으로 막히므로: 6회 재시도, https↔http 번갈아 시도
+        endpoints = [self.endpoint]
+        alt = self.endpoint.replace("https://", "http://") if self.endpoint.startswith("https://") else self.endpoint.replace("http://", "https://")
+        endpoints.append(alt)
+        for attempt in range(6):
+            ep = endpoints[attempt % 2]
             try:
-                r = requests.get(self.endpoint, params=params, timeout=60)
+                r = requests.get(ep, params=params, timeout=(20, 90))
                 text = r.text
                 if r.status_code != 200 or "<" in text[:5]:
-                    # 인증키 문제면 JSON 대신 XML/HTML 오류 페이지가 옴 → 내용 그대로 보여줌
                     snippet = text.strip().replace("\n", " ")[:300]
                     if "SERVICE_KEY" in text or "SERVICE KEY" in text or "인증" in text:
-                        raise RuntimeError(f"인증키 오류 (.env 의 G2B_SERVICE_KEY 확인, Decoding 키인지 확인): {snippet}")
+                        raise RuntimeError(f"인증키 오류 (G2B_SERVICE_KEY 확인): {snippet}")
                     raise RuntimeError(f"HTTP {r.status_code}: {snippet}")
                 data = r.json()
                 break
             except (requests.RequestException, ValueError, RuntimeError) as e:
-                last_err = str(e)
-                log.warning("g2b 요청 실패(%d/3): %s", attempt + 1, e)
-                time.sleep(2 * (attempt + 1))
+                last_err = str(e)[:200]
+                log.warning("g2b 요청 실패(%d/6, %s): %s", attempt + 1, ep.split("/")[2] + ("/https" if ep.startswith("https") else "/http"), last_err)
+                time.sleep(min(10 * (attempt + 1), 45))
         else:
-            raise RuntimeError(f"g2b API 3회 실패 — 마지막 오류: {last_err}")
+            raise RuntimeError(f"g2b API 6회 실패 — 마지막 오류: {last_err}")
 
         resp = data.get("response", {})
         header = resp.get("header", {})
