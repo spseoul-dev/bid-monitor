@@ -2,12 +2,16 @@ name: 입찰공고 수집
 
 on:
   schedule:
-    - cron: "0 22 * * *"    # 매일 07:00 KST
-    - cron: "0 3 * * 1-5"   # 평일 12:00 KST
+    - cron: "0 22 * * *"          # 매일 07:00 KST
+    - cron: "0 23,0,1,2,3,4,5,6,7,8,9 * * 1-5"   # 평일 08~18시 매시간 KST (한 번만 성공해도 됨)
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: collect
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -21,10 +25,18 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
-      - run: python build.py
+      - name: 수집 (실패 시 5분 후 재시도, 최대 3회)
         env:
           G2B_SERVICE_KEY: ${{ secrets.G2B_SERVICE_KEY }}
           TZ: Asia/Seoul
+        run: |
+          for i in 1 2 3; do
+            if python build.py; then exit 0; fi
+            echo "::warning::수집 실패 ($i/3) — 5분 후 재시도"
+            sleep 300
+          done
+          echo "::error::3회 모두 실패. 이전 페이지 유지."
+          exit 1
       - name: 페이지 복사 및 커밋
         run: |
           mkdir -p ../docs
