@@ -9,6 +9,7 @@ LH·GH 등 자체조달시스템 공고도 나라장터에 연계 게시되므�
 """
 import json
 import logging
+import re
 import time
 from datetime import datetime, timedelta
 
@@ -18,6 +19,11 @@ from ..models import Notice
 from .base import BaseCollector
 
 log = logging.getLogger(__name__)
+
+
+def _mask(msg: str) -> str:
+    """오류 메시지/URL 에 섞인 인증키 제거 (로그 노출 방지)"""
+    return re.sub(r"serviceKey=[^&\s'\")]*", "serviceKey=***", str(msg))
 
 
 def _to_int(v):
@@ -82,7 +88,7 @@ class G2BCollector(BaseCollector):
                 data = r.json()
                 break
             except (requests.RequestException, ValueError, RuntimeError) as e:
-                last_err = str(e)[:200]
+                last_err = _mask(e)[:200]
                 log.warning("g2b 요청 실패(%d/6, %s): %s", attempt + 1, ep.split("/")[2] + ("/https" if ep.startswith("https") else "/http"), last_err)
                 time.sleep(min(10 * (attempt + 1), 45))
         else:
