@@ -28,7 +28,9 @@ _CENTRAL_RE = _re.compile(r"(?:부|처|청|위원회|원|본부|사령부|국)$"
 
 def categorize(n: Notice) -> None:
     """공고기관명으로 카테고리 부여: 공공기관 / 교육기관 / 지자체 / 중앙정부 / 기타"""
-    name = (n.institution or n.demand_institution or "").strip()
+    name = (n.institution or "").strip()
+    if not name or "조달청" in name or "지방조달청" in name:   # 조달청 대행이면 실제 수요기관 기준
+        name = (n.demand_institution or name).strip()
     if not name:
         n.category = "기타"; return
     if any(k in name for k in _EDU):

@@ -20,7 +20,7 @@ log = logging.getLogger("build")
 DOCS = ROOT / "docs"
 INDEX = DOCS / "index.html"
 SEEN = DOCS / "seen.json"
-KEEP = ["key", "title", "institution", "demand_institution", "notice_date", "close_date",
+KEEP = ["key", "notice_no", "title", "institution", "demand_institution", "notice_date", "close_date",
         "estimated_price", "budget", "award_method", "notice_kind", "url", "tags", "category"]
 
 
