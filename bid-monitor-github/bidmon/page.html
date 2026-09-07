@@ -64,7 +64,7 @@ textarea{width:100%;height:170px;font:inherit;font-size:13px;line-height:1.5;bor
 <div class="bar">
   <h1>입찰공고<small id="asof">__DATE__ 갱신</small></h1>
   <input type="search" id="q" placeholder="공고명 검색 후 엔터"><button class="a q" id="btnSearch">검색</button>
-  <label class="chk"><input type="checkbox" id="matched" checked>관심 공고만</label>
+  <label class="chk"><input type="checkbox" id="matched">관심 공고만</label>
   <label class="chk"><input type="checkbox" id="open" checked>마감 지난 것 숨기기</label>
   <div class="right">
     <span class="count" id="count"></span>
@@ -105,7 +105,7 @@ const $=id=>document.getElementById(id);
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
 let KW=load(LS_KW,DEFAULT_KW);
-const S=Object.assign({q:"",cat:"",tag:"",kind:"",matched:true,open:true},load(LS_S,{}));
+const S=Object.assign({q:"",cat:"",tag:"",kind:"",matched:false,open:true},load(LS_S,{}));
 const norm=s=>String(s||"").replace(/\s/g,"");
 const fmtWon=v=>v?Math.round(v/1e6).toLocaleString()+"백만":"";
 const dday=c=>{if(!c)return null;const d=new Date(c.replace(" ","T"));return Math.floor((d-NOW)/864e5);};
@@ -130,7 +130,7 @@ function render(){
     if(q&&!norm(n.title).toLowerCase().includes(q))return false;
     return true;
   });
-  $("count").textContent=rows.length+"건";
+  $("count").textContent=rows.length+"건 / 전체 "+DATA.length+"건";
   const el=$("list");
   if(!rows.length){el.innerHTML='<div class="empty">조건에 맞는 공고가 없습니다. 관심 키워드를 넓히거나 "관심 공고만"을 꺼보세요.</div>';return;}
   let html="",last="";
