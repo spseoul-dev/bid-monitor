@@ -8,6 +8,13 @@ import logging
 import re
 import sys
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+KST = ZoneInfo("Asia/Seoul")
+
+
+def now_kst() -> datetime:
+    return datetime.now(KST).replace(tzinfo=None)
 from pathlib import Path
 
 from bidmon.config import load_config, ROOT
@@ -56,7 +63,7 @@ def main():
         sys.exit(1)
 
     seen = json.loads(SEEN.read_text(encoding="utf-8")) if SEEN.exists() else {}
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = now_kst().strftime("%Y-%m-%d")
     for n in notices:
         tag_institutions(n, cfg["institutions"])
         categorize(n)
@@ -64,15 +71,15 @@ def main():
         d["first_seen"] = seen.setdefault(n.key, today)
         prev[n.key] = d          # 새 정보로 덮어씀 (변경공고 반영)
 
-    cutoff = (datetime.now() - timedelta(days=keep_days)).strftime("%Y-%m-%d")
+    cutoff = (now_kst() - timedelta(days=keep_days)).strftime("%Y-%m-%d")
     data = [r for r in prev.values() if (r.get("notice_date") or "") >= cutoff]
     for r in data:
         r.setdefault("first_seen", seen.get(r["key"], today))
     data.sort(key=lambda r: r["notice_date"] or "", reverse=True)
-    seen = {k: v for k, v in seen.items() if v >= (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")}
+    seen = {k: v for k, v in seen.items() if v >= (now_kst() - timedelta(days=60)).strftime("%Y-%m-%d")}
 
     kw = {"include": cfg["filters"]["include_keywords"], "exclude": cfg["filters"]["exclude_keywords"]}
-    now = datetime.now()
+    now = now_kst()
     html = ((ROOT / "bidmon" / "page.html").read_text(encoding="utf-8")
             .replace("__DATA__", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
             .replace("__KW__", json.dumps(kw, ensure_ascii=False))

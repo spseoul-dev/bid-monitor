@@ -12,6 +12,7 @@ import logging
 import re
 import time
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import requests
 
@@ -145,7 +146,7 @@ class G2BCollector(BaseCollector):
         )
 
     def collect(self, lookback_days: int) -> list[Notice]:
-        end = datetime.now()
+        end = datetime.now(ZoneInfo("Asia/Seoul")).replace(tzinfo=None)
         bgn = end - timedelta(days=lookback_days)
         insts = self.inst_filter or [None]
         out: dict[str, Notice] = {}
