@@ -83,7 +83,7 @@ textarea{width:100%;height:170px;font:inherit;font-size:13px;line-height:1.5;bor
 </div>
 <div id="panel"><div class="pin">
   <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
-  <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. ("공사"만 예외: 설계공모·설계용역류 제목에서는 무시)</p><textarea id="kwExc"></textarea></div>
+  <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
   <div class="act">
     <button class="a" id="btnSave">저장</button>
     <button class="a q" id="btnReset">회사 기본값으로</button>
@@ -99,7 +99,6 @@ const DATA=__DATA__;
 const DEFAULT_KW=__KW__;
 const BUILT="__NOW__";
 const NOW=new Date(BUILT);
-const STRONG=["설계공모","현상설계","설계용역","기본설계","실시설계"];
 const LS_KW="bidmon.kw", LS_S="bidmon.filters";
 const $=id=>document.getElementById(id);
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
@@ -113,11 +112,8 @@ function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt
 function judge(n){
   const t=norm(n.title);
   const inc=KW.include.filter(k=>k&&t.includes(norm(k)));
-  const exc=KW.exclude.filter(k=>k&&t.includes(norm(k)));
-  const strong=STRONG.some(k=>t.includes(k));
-  // "공사"는 'OO공사 설계용역'처럼 제목에 흔히 섞이므로 강한 키워드가 있으면 무시. 그 외 제외어는 항상 제외.
-  const blocked=exc.some(k=>norm(k)!=="공사")||(exc.length>0&&!strong);
-  n.matched=inc.length>0&&!blocked;
+  const exc=KW.exclude.some(k=>k&&t.includes(norm(k)));
+  n.matched=inc.length>0&&!exc;
   n.mk=[...new Set(inc.map(norm))].join(",");
 }
 function judgeAll(){DATA.forEach(judge);}
@@ -151,7 +147,7 @@ function render(){
     const nw=n.first_seen===today?'<span class="tag new">NEW</span>':"";
     const meta=[n.institution, n.demand_institution&&n.demand_institution!==n.institution?n.demand_institution:"",
       n.close_date?(n.notice_kind==="사전규격"?"의견마감 ":"마감 ")+n.close_date:"",
-      fmtWon(n.estimated_price||n.budget), n.award_method, n.mk].filter((x,i,a)=>x&&a.indexOf(x)===i);
+      fmtWon(n.estimated_price||n.budget), (n.award_method||"").replace(/^(.+)-\1$/,"$1"), n.mk].filter((x,i,a)=>x&&a.indexOf(x)===i);
     const title=n.url?`<a class="t" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`:`<span class="t">${esc(n.title)}</span>`;
     html+=`<div class="row">${dd}<div>${nw}${tags}${pre}${title}<div class="m"><span class="cat">${esc(n.category||"")}</span>${meta.map(x=>`<span>${esc(x)}</span>`).join("")}</div></div></div>`;
   }

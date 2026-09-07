@@ -13,16 +13,13 @@ def apply_keyword_filter(n: Notice, include: list[str], exclude: list[str]) -> N
     exc = [k for k in exclude if k.replace(" ", "") in title]
     # 포함 키워드가 있고, 제외 키워드가 없으면 관심 공고
     # 단, "설계공모/설계용역" 처럼 강한 키워드는 제외어("공사")가 있어도 살림 (예: "OO공사 설계용역")
-    strong = any(k in title for k in ("설계공모", "현상설계", "설계용역", "기본설계", "실시설계"))
-    # "공사"는 'OO공사 설계용역' 처럼 흔히 섞이므로 강한 키워드가 있으면 무시. 그 외 제외어는 항상 제외.
-    blocked = any(k.replace(" ", "") != "공사" for k in exc) or (bool(exc) and not strong)
-    n.matched = int(bool(inc) and not blocked)
+    n.matched = int(bool(inc) and not exc)
     n.matched_keywords = ",".join(dict.fromkeys(k.replace(" ", "") for k in inc))
 
 
 import re as _re
 
-_PUBLIC = ("공사", "공단", "진흥원", "재단", "연구원", "공공기관", "센터", "협회", "공제")
+_PUBLIC = ("공사", "공단", "진흥원", "재단", "연구원", "연구소", "사업단", "공기업", "공공기관", "센터", "협회", "공제", "공제회", "기금", "관리원", "평가원", "심사")
 _EDU = ("교육청", "교육지원청", "학교", "대학", "교육원")
 _LOCAL_HINT = ("특별시", "광역시", "특별자치", "시청", "군청", "구청", "도청")
 _LOCAL_RE = _re.compile(r"(?:^|\s)\S+(?:시|군|구|도)(?:$|\s)")
