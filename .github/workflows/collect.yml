@@ -12,6 +12,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bid-monitor-github
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -22,10 +25,12 @@ jobs:
         env:
           G2B_SERVICE_KEY: ${{ secrets.G2B_SERVICE_KEY }}
           TZ: Asia/Seoul
-      - name: 결과 커밋
+      - name: 페이지 복사 및 커밋
         run: |
+          mkdir -p ../docs
+          cp docs/index.html ../docs/index.html
           git config user.name "bid-bot"
           git config user.email "bid-bot@users.noreply.github.com"
-          git add docs/
+          git add docs/ ../docs/
           git diff --cached --quiet || git commit -m "공고 갱신 $(date +'%Y-%m-%d %H:%M')"
           git push
