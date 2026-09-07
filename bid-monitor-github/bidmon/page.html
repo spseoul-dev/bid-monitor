@@ -14,6 +14,7 @@ html{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sa
 body{margin:0}
 header{position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);z-index:2}
 .bar{max-width:1120px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+#btnSearch{margin-left:-10px}
 .bar+.bar{padding-top:0}
 h1{font-size:19px;font-weight:700;margin:0 10px 0 0;letter-spacing:-.01em}
 h1 small{font-weight:400;color:var(--ink-3);font-size:13px;margin-left:8px}
@@ -62,7 +63,7 @@ textarea{width:100%;height:170px;font:inherit;font-size:13px;line-height:1.5;bor
 <header>
 <div class="bar">
   <h1>입찰공고<small id="asof">__DATE__ 갱신</small></h1>
-  <input type="search" id="q" placeholder="공고명 검색">
+  <input type="search" id="q" placeholder="공고명 검색 후 엔터"><button class="a q" id="btnSearch">검색</button>
   <label class="chk"><input type="checkbox" id="matched" checked>관심 공고만</label>
   <label class="chk"><input type="checkbox" id="open" checked>마감 지난 것 숨기기</label>
   <div class="right">
@@ -159,7 +160,10 @@ function syncUI(){
     document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.toggle("on",b.dataset[attr]===S[key]));
 }
 function fillKw(){$("kwInc").value=KW.include.join("\n");$("kwExc").value=KW.exclude.join("\n");}
-$("q").addEventListener("input",e=>{S.q=e.target.value;save(LS_S,S);render();});
+const doSearch=()=>{S.q=$("q").value;save(LS_S,S);render();};
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch();});
+$("q").addEventListener("search",()=>{if(!$("q").value)doSearch();});  // x 버튼으로 지웠을 때
+$("btnSearch").onclick=doSearch;
 $("matched").addEventListener("change",e=>{S.matched=e.target.checked;save(LS_S,S);render();});
 $("open").addEventListener("change",e=>{S.open=e.target.checked;save(LS_S,S);render();});
 for(const [id,key,attr] of [["cats","cat","cat"],["tags","tag","tag"],["kinds","kind","kind"]]){
