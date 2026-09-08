@@ -3,219 +3,274 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>입찰공고 모니터</title>
-<link rel="icon" type="image/png" href="data:image/png;base64,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">
 <style>
 :root{
-  --ink:#1c2430; --ink-2:#5b6672; --ink-3:#98a2ad; --line:#e3e7ec; --paper:#fff; --wash:#f5f7f9;
-  --lh:#0e6b5e; --gh:#3b4ba6; --ih:#8a4f9e; --sh:#a35a1c; --urgent:#c0392b; --pre:#6a5b2b; --ok:#1e7a4a; --new:#1e7a4a;
+  --bg:#f7f8fa;--panel:#fff;--ink:#172b4d;--ink2:#44546f;--ink3:#8590a2;--line:#dfe1e6;--hover:#f1f2f4;
+  --acc:#0c66e4;--accbg:#e9f2ff;--warn:#c9372c;--warnbg:#ffeceb;--mid:#a54800;--midbg:#fff3e0;
+  --lh:#1f845a;--gh:#5e4db2;--ih:#943d73;--sh:#a54800;--newbg:#dcfff1;--newfg:#216e4e;--prebg:#fff7d6;--prefg:#7f5f01;
+  --sb:236px;--rowpad:9px;
 }
+@media (prefers-color-scheme:dark){:root{
+  --bg:#161a1d;--panel:#1d2125;--ink:#c7d1db;--ink2:#9fadbc;--ink3:#738496;--line:#2c333a;--hover:#22272b;
+  --acc:#579dff;--accbg:#1c2b41;--warn:#f87168;--warnbg:#42221f;--mid:#f5a623;--midbg:#3a2e14;
+  --lh:#4bce97;--gh:#9f8fef;--ih:#e774bb;--sh:#f5a623;--newbg:#1c3329;--newfg:#7ee2b8;--prebg:#332e1b;--prefg:#e2b203;
+}}
 *{box-sizing:border-box}
-html{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;color:var(--ink);background:var(--paper);font-size:15px;line-height:1.45}
-body{margin:0}
-header{position:sticky;top:0;background:var(--paper);border-bottom:1px solid var(--line);z-index:2}
-.bar{max-width:1120px;margin:0 auto;padding:12px 20px 8px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
-#btnSearch{margin-left:-10px}
-.bar+.bar{padding-top:0}
-h1{font-size:19px;font-weight:700;margin:0 10px 0 0;letter-spacing:-.01em}
-h1 small{font-weight:400;color:var(--ink-3);font-size:13px;margin-left:8px}
-.group{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
-.group span.lbl{color:var(--ink-3);font-size:13px;margin-right:2px}
-button{font:inherit;cursor:pointer}
-button.f{border:1px solid var(--line);background:var(--paper);color:var(--ink-2);border-radius:999px;padding:3px 11px;font-size:13px}
-button.f.on{background:var(--ink);border-color:var(--ink);color:#fff}
-button.a{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:6px;padding:5px 13px;font-size:13px}
-button.a.q{background:var(--paper);color:var(--ink)}
-button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--gh);outline-offset:2px}
-input[type=search]{border:1px solid var(--line);border-radius:6px;padding:5px 10px;font:inherit;font-size:14px;width:240px}
-label.chk{font-size:13px;color:var(--ink-2);display:flex;gap:5px;align-items:center;cursor:pointer}
+html{font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;font-size:14px;line-height:1.45;color:var(--ink);background:var(--bg)}
+body{margin:0;display:grid;grid-template-columns:var(--sb) 1fr;min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+
+/* ── 사이드바 ── */
+aside{background:var(--panel);border-right:1px solid var(--line);padding:16px 12px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:15px;padding:4px 8px 14px}
+.brand i{width:22px;height:22px;border-radius:6px;background:var(--acc);display:inline-block;position:relative}
+.brand i::after{content:"";position:absolute;left:6px;top:6px;width:10px;height:10px;border:2px solid #fff;border-radius:2px}
+.nav h4{font-size:11px;color:var(--ink3);margin:14px 8px 4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.nav button{display:flex;width:100%;justify-content:space-between;align-items:center;padding:7px 8px;border:0;background:none;border-radius:6px;color:var(--ink2);font-size:13.5px;text-align:left}
+.nav button:hover{background:var(--hover)}
+.nav button.on{background:var(--accbg);color:var(--acc);font-weight:600}
+.nav button span{color:var(--ink3);font-size:12px;font-variant-numeric:tabular-nums}
+.nav button.on span{color:var(--acc)}
+.nav .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:8px;vertical-align:0}
+.asof{margin:18px 8px 0;font-size:11.5px;color:var(--ink3);line-height:1.5}
+
+/* ── 헤더 ── */
+main{min-width:0}
+.hd{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 24px 12px;position:sticky;top:0;z-index:3}
+.hd h1{font-size:20px;margin:0 0 10px;font-weight:700;display:flex;align-items:baseline;gap:10px}
+.hd h1 small{font-size:13px;color:var(--ink3);font-weight:400}
+.tb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.search{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:4px;padding:0 8px;background:var(--panel);width:320px;max-width:100%}
+.search input{border:0;background:none;padding:7px 2px;font:inherit;width:100%;color:var(--ink)}
+.search input::placeholder{color:var(--ink3)}
+.search svg{width:14px;height:14px;color:var(--ink3);flex:none}
+select{border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink2)}
 .right{margin-left:auto;display:flex;gap:8px;align-items:center}
-.count{color:var(--ink-3);font-size:13px}
-main{max-width:1120px;margin:0 auto;padding:6px 20px 60px}
-.day{margin-top:22px;padding-bottom:4px;border-bottom:1px solid var(--line);color:var(--ink-2);font-size:13px;font-weight:600}
-.row{display:grid;grid-template-columns:64px 1fr;gap:0 14px;padding:11px 0;border-bottom:1px solid var(--line)}
-.row:hover{background:var(--wash)}
-.dd{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1;padding-top:2px;color:var(--ink-2);text-align:right}
-.dd.u{color:var(--urgent)}
-.dd.x{color:var(--ink-3);font-size:14px;font-weight:500;padding-top:6px}
-.dd small{display:block;font-size:11px;font-weight:400;color:var(--ink-3);margin-top:3px;letter-spacing:0}
-.t{font-size:15.5px;font-weight:600;text-decoration:none;color:var(--ink)}
-.t:hover{text-decoration:underline}
-.m{margin-top:3px;font-size:13px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:4px 14px}
-.m .cat{color:var(--ink-3)}
-.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:1px 6px;border-radius:4px;color:#fff;margin-right:6px;vertical-align:2px}
-.tag.LH{background:var(--lh)}.tag.GH{background:var(--gh)}.tag.IH{background:var(--ih)}.tag.SH{background:var(--sh)}
-.tag.pre{background:transparent;color:var(--pre);border:1px solid var(--pre)}
-.tag.new{background:transparent;color:var(--new);border:1px solid var(--new);font-weight:600}
-.empty{padding:60px 0;text-align:center;color:var(--ink-3)}
-#panel{display:none;border-bottom:1px solid var(--line);background:var(--wash)}
+.btn{border:1px solid var(--line);border-radius:4px;padding:6px 12px;font-size:13px;background:var(--panel);color:var(--ink)}
+.btn:hover{background:var(--hover)}
+.btn.p{background:var(--acc);color:#fff;border-color:var(--acc)}
+.btn.p:hover{filter:brightness(1.08)}
+.dens{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
+.dens button{border:0;background:var(--panel);padding:5px 9px;font-size:13px;color:var(--ink3);line-height:1}
+.dens button.on{background:var(--hover);color:var(--ink)}
+
+/* ── 키워드 패널 ── */
+#panel{display:none;background:var(--panel);border-bottom:1px solid var(--line)}
 #panel.open{display:block}
-.pin{max-width:1120px;margin:0 auto;padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.pin h2{font-size:14px;margin:0 0 6px;font-weight:600}
-.pin p{margin:0 0 8px;font-size:12.5px;color:var(--ink-2)}
-textarea{width:100%;height:170px;font:inherit;font-size:13px;line-height:1.5;border:1px solid var(--line);border-radius:6px;padding:8px 10px;resize:vertical;background:var(--paper)}
+.pin{padding:14px 24px;display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:1100px}
+.pin h2{font-size:13.5px;margin:0 0 4px;font-weight:600}.pin p{margin:0 0 6px;font-size:12.5px;color:var(--ink2)}
+textarea{width:100%;height:150px;font:inherit;font-size:13px;line-height:1.5;border:1px solid var(--line);border-radius:4px;padding:8px 10px;resize:vertical;background:var(--bg);color:var(--ink)}
 .pin .act{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.msg{font-size:13px;color:var(--ok)}
-.note{font-size:12.5px;color:var(--ink-3);grid-column:1/-1}
-@media (max-width:720px){
-  html{font-size:14px}
-  .bar{padding:10px 12px 6px;gap:6px 10px}
-  .bar+.bar{padding-top:0;padding-bottom:8px}
-  h1{font-size:17px;margin-right:0;width:100%;display:flex;align-items:baseline;justify-content:space-between}
-  h1 small{margin-left:0}
-  input[type=search]{flex:1 1 180px;min-width:180px;width:auto}
-  #btnSearch{flex:0 0 auto}
-  label.chk:first-of-type{margin-left:0}
-  #btnSearch{margin-left:0}
-  .right{margin-left:0;width:100%;justify-content:space-between}
-  label.chk{font-size:12.5px}
-  /* 필터 줄: 가로 스크롤 한 줄 */
-  header{position:static}   /* 모바일에선 헤더 고정 해제 (필터가 화면을 많이 차지) */
-  .group+.group{margin-left:0;padding-left:0;border-left:0}
-  .group{flex-basis:100%}
-  button.f{padding:3px 9px;font-size:12.5px}
-  main{padding:4px 12px 40px}
-  .day{margin-top:16px}
-  .row{grid-template-columns:44px 1fr;gap:0 10px;padding:10px 0}
-  .dd{font-size:17px}
-  .dd small{font-size:10px}
-  .dd.x{font-size:12px;padding-top:4px}
-  .t{font-size:14.5px;line-height:1.35;display:block;margin-top:2px}
-  .tag{font-size:10.5px;padding:1px 5px;margin-right:4px}
-  .m{font-size:12px;gap:2px 10px;margin-top:4px}
-  .pin{grid-template-columns:1fr;padding:12px}
-  textarea{height:120px}
+.msg{font-size:13px;color:var(--newfg)}.note{font-size:12px;color:var(--ink3);grid-column:1/-1}
+
+/* ── 표 ── */
+.wrap{padding:16px 24px 40px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{font-size:12px;color:var(--ink3);font-weight:600;text-align:left;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:var(--rowpad) 12px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:var(--hover)}
+.d{display:inline-block;font-weight:700;padding:2px 8px;border-radius:3px;background:var(--hover);color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.d.u{background:var(--warnbg);color:var(--warn)}.d.m{background:var(--midbg);color:var(--mid)}
+.d small{font-weight:400;font-size:11px;color:var(--ink3);margin-left:5px}
+.lz{display:inline-block;font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;color:#fff;margin-right:5px;vertical-align:1px}
+.LH{background:var(--lh)}.GH{background:var(--gh)}.IH{background:var(--ih)}.SH{background:var(--sh)}
+.pre{background:var(--prebg);color:var(--prefg)}.new{background:var(--newbg);color:var(--newfg)}
+.t{font-weight:600;color:var(--acc);text-decoration:none}
+.t:hover{text-decoration:underline}
+.t.x{color:var(--ink)}
+.c{color:var(--ink2)}.r{text-align:right;color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.kw{color:var(--ink3);font-size:12.5px}
+.sub{color:var(--ink3);font-size:12px;margin-top:2px}
+.empty{padding:60px 20px;text-align:center;color:var(--ink3)}
+.pg{display:flex;justify-content:space-between;padding:10px 4px;color:var(--ink3);font-size:12.5px}
+body.compact{--rowpad:5px}
+body.compact td{font-size:13px}
+body.compact .sub{display:none}
+
+/* ── 모바일 ── */
+.mnav{display:none}
+@media (max-width:860px){
+  body{grid-template-columns:1fr}
+  aside{display:none}
+  .hd{padding:12px 14px 10px;position:static}
+  .hd h1{font-size:18px}
+  .search{width:100%}
+  .right{margin-left:0;width:100%}
+  .dens{display:none}
+  .mnav{display:flex;gap:4px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none;background:var(--panel);border-bottom:1px solid var(--line)}
+  .mnav::-webkit-scrollbar{display:none}
+  .mnav button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink2)}
+  .mnav button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+  .mnav button span{opacity:.7;margin-left:4px;font-size:12px}
+  .wrap{padding:10px 14px 40px}
+  .pin{grid-template-columns:1fr;padding:12px 14px}
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  tr{padding:11px 12px;border-bottom:1px solid var(--line)}
+  td{padding:0;border:0;font-size:14px}
+  td.c,td.r,td.kw{display:inline;margin-right:10px;font-size:12.5px}
+  td.cat::before{content:"· "}
+  td.dcell{margin-bottom:5px}
+  td.tcell{margin-bottom:4px;line-height:1.4}
+  .sub{display:inline}.sub::before{content:" / "}
+  .t{color:var(--ink)}
 }
 </style>
 </head>
 <body>
-<header>
-<div class="bar">
-  <h1>입찰공고<small id="asof">__DATE__ 갱신</small></h1>
-  <input type="search" id="q" placeholder="공고명 또는 발주처 검색 후 엔터"><button class="a q" id="btnSearch">검색</button>
-  <label class="chk"><input type="checkbox" id="matched">관심 공고만</label>
-  <label class="chk"><input type="checkbox" id="open" checked>마감 지난 것 숨기기</label>
-  <div class="right">
-    <span class="count" id="count"></span>
-    <button class="a q" id="btnKw">내 관심 키워드</button>
+<aside>
+  <div class="brand"><i></i>입찰공고 모니터</div>
+  <div class="nav" id="nav">
+    <h4>뷰</h4>
+    <button data-view="matched" class="on">관심 공고<span id="n-matched"></span></button>
+    <button data-view="urgent">마감 임박 (7일)<span id="n-urgent"></span></button>
+    <button data-view="new">오늘 신규<span id="n-new"></span></button>
+    <button data-view="pre">사전규격<span id="n-pre"></span></button>
+    <button data-view="all">전체<span id="n-all"></span></button>
+    <h4>기관</h4>
+    <button data-tag="" class="on">전체 기관</button>
+    <button data-tag="LH"><b><i class="dot" style="background:var(--lh)"></i>LH</b><span id="n-LH"></span></button>
+    <button data-tag="GH"><b><i class="dot" style="background:var(--gh)"></i>GH</b><span id="n-GH"></span></button>
+    <button data-tag="IH"><b><i class="dot" style="background:var(--ih)"></i>IH</b><span id="n-IH"></span></button>
+    <button data-tag="SH"><b><i class="dot" style="background:var(--sh)"></i>SH</b><span id="n-SH"></span></button>
+    <h4>설정</h4>
+    <button id="btnKw">내 관심 키워드</button>
+    <button id="btnReset">회사 기본값으로</button>
   </div>
-</div>
-<div class="filters"><div class="bar" id="fbar">
-  <div class="group" id="cats"><span class="lbl">구분</span>
-    <button class="f on" data-cat="">전체</button><button class="f" data-cat="공공기관">공공기관</button><button class="f" data-cat="지자체">지자체</button><button class="f" data-cat="중앙정부">중앙정부</button><button class="f" data-cat="교육기관">교육기관</button><button class="f" data-cat="기타">기타</button>
+  <div class="asof">__DATE__ 갱신<br>최근 30일 · <span id="total"></span>건</div>
+</aside>
+
+<main>
+  <div class="hd">
+    <h1 id="vtitle">관심 공고 <small id="count"></small></h1>
+    <div class="tb">
+      <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="공고명, 발주처 검색 후 엔터"></label>
+      <select id="cat"><option value="">구분: 전체</option><option>공공기관</option><option>지자체</option><option>중앙정부</option><option>교육기관</option><option>기타</option></select>
+      <select id="kind"><option value="">종류: 전체</option><option value="bid">입찰공고</option><option value="pre">사전규격</option></select>
+      <select id="open"><option value="1">마감: 진행 중</option><option value="">마감: 전체</option></select>
+      <div class="right">
+        <div class="dens"><button id="dComf" title="보통">☰</button><button id="dComp" title="빽빽하게">≡</button></div>
+        <button class="btn p" id="btnKw2">내 키워드</button>
+      </div>
+    </div>
   </div>
-  <div class="group" id="tags"><span class="lbl">기관</span>
-    <button class="f on" data-tag="">전체</button><button class="f" data-tag="LH">LH</button><button class="f" data-tag="GH">GH</button><button class="f" data-tag="IH">IH</button><button class="f" data-tag="SH">SH</button>
+  <div class="mnav" id="mnav"></div>
+  <div id="panel"><div class="pin">
+    <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
+    <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
+    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">회사 기본값으로</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span></div>
+    <div class="note">키워드와 필터는 이 브라우저에만 저장됩니다. 다른 PC나 브라우저에서는 회사 기본값부터 시작합니다.</div>
+  </div></div>
+  <div class="wrap">
+    <div class="card"><table>
+      <thead><tr><th style="width:96px">마감</th><th>공고명</th><th style="width:200px">발주처</th><th style="width:80px">구분</th><th style="width:96px;text-align:right">추정가격</th><th style="width:110px">키워드</th></tr></thead>
+      <tbody id="tb"></tbody>
+    </table></div>
+    <div class="pg"><span id="pgl"></span><span>__DATE__ 갱신</span></div>
   </div>
-  <div class="group" id="kinds"><span class="lbl">종류</span>
-    <button class="f on" data-kind="">전체</button><button class="f" data-kind="bid">입찰공고</button><button class="f" data-kind="pre">사전규격</button>
-  </div>
-</div></div>
-<div id="panel"><div class="pin">
-  <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
-  <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
-  <div class="act">
-    <button class="a" id="btnSave">저장</button>
-    <button class="a q" id="btnReset">회사 기본값으로</button>
-    <button class="a q" id="btnClose">닫기</button>
-    <span class="msg" id="kwMsg"></span>
-  </div>
-  <div class="note">키워드와 필터는 이 브라우저에만 저장됩니다. 다른 PC나 브라우저에서는 기본값부터 시작합니다.</div>
-</div></div>
-</header>
-<main id="list"></main>
+</main>
+
 <script>
 const DATA=__DATA__;
 const DEFAULT_KW=__KW__;
 const BUILT="__NOW__";
 const NOW=new Date(BUILT);
-const LS_KW="bidmon.kw", LS_S="bidmon.filters";
+const TODAY=BUILT.slice(0,10);
+const LS_KW="bidmon.kw",LS_S="bidmon.filters2";
+const VIEWS={matched:"관심 공고",urgent:"마감 임박",new:"오늘 신규",pre:"사전규격",all:"전체 공고"};
 const $=id=>document.getElementById(id);
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
 let KW=load(LS_KW,DEFAULT_KW);
-const S=Object.assign({q:"",cat:"",tag:"",kind:"",matched:false,open:true},load(LS_S,{}));
+const S=Object.assign({view:"matched",tag:"",q:"",cat:"",kind:"",open:"1",dens:"comf"},load(LS_S,{}));
 const norm=s=>String(s||"").replace(/\s/g,"");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtWon=v=>v?Math.round(v/1e6).toLocaleString()+"백만":"";
-const dday=c=>{if(!c)return null;const d=new Date(c.replace(" ","T"));return Math.floor((d-NOW)/864e5);};
-function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function judge(n){
-  const t=norm(n.title);
-  const inc=KW.include.filter(k=>k&&t.includes(norm(k)));
-  const exc=KW.exclude.some(k=>k&&t.includes(norm(k)));
-  n.matched=inc.length>0&&!exc;
-  n.mk=[...new Set(inc.map(norm))].join(",");
-}
+const dday=c=>{if(!c)return null;return Math.floor((new Date(c.replace(" ","T"))-NOW)/864e5);};
+
+function judge(n){const t=norm(n.title);const inc=KW.include.filter(k=>k&&t.includes(norm(k)));const exc=KW.exclude.some(k=>k&&t.includes(norm(k)));n.matched=inc.length>0&&!exc;n.mk=[...new Set(inc.map(norm))].join(", ");n.dd=dday(n.close_date);n.isNew=n.first_seen===TODAY;n.isPre=n.notice_kind==="사전규격";}
 function judgeAll(){DATA.forEach(judge);}
+
+function base(n){
+  if(S.cat&&n.category!==S.cat)return false;
+  if(S.kind==="pre"&&!n.isPre)return false;
+  if(S.kind==="bid"&&n.isPre)return false;
+  if(S.open&&n.dd!==null&&n.dd<0)return false;
+  if(S.q){const q=norm(S.q).toLowerCase();if(!norm(n.title+" "+(n.institution||"")+" "+(n.demand_institution||"")).toLowerCase().includes(q))return false;}
+  return true;
+}
+function inView(n,v){
+  if(v==="all")return true;
+  if(!n.matched)return false;
+  if(v==="urgent")return n.dd!==null&&n.dd>=0&&n.dd<=7;
+  if(v==="new")return n.isNew;
+  if(v==="pre")return n.isPre;
+  return true;
+}
+const hasTag=(n,t)=>!t||(n.tags||"").split(",").includes(t);
+
+function counts(){
+  const b=DATA.filter(base);
+  for(const v of Object.keys(VIEWS))$("n-"+v).textContent=b.filter(n=>inView(n,v)&&hasTag(n,S.tag)).length.toLocaleString();
+  for(const t of ["LH","GH","IH","SH"])$("n-"+t).textContent=b.filter(n=>inView(n,S.view)&&hasTag(n,t)).length||"";
+  $("total").textContent=DATA.length.toLocaleString();
+}
+
 function render(){
-  const q=norm(S.q).toLowerCase();
-  const rows=DATA.filter(n=>{
-    if(S.matched&&!n.matched)return false;
-    if(S.cat&&n.category!==S.cat)return false;
-    if(S.tag&&!(n.tags||"").split(",").includes(S.tag))return false;
-    if(S.kind==="pre"&&n.notice_kind!=="사전규격")return false;
-    if(S.kind==="bid"&&n.notice_kind==="사전규격")return false;
-    if(S.open){const d=dday(n.close_date);if(d!==null&&d<0)return false;}
-    if(q&&!norm(n.title+" "+(n.institution||"")+" "+(n.demand_institution||"")).toLowerCase().includes(q))return false;
-    return true;
-  });
-  $("count").textContent=rows.length+"건 / 전체 "+DATA.length+"건";
-  const el=$("list");
-  if(!rows.length){el.innerHTML='<div class="empty">조건에 맞는 공고가 없습니다. 관심 키워드를 넓히거나 "관심 공고만"을 꺼보세요.</div>';return;}
-  let html="",last="";
-  const today=BUILT.slice(0,10);
-  for(const n of rows){
-    const day=(n.notice_date||"").slice(0,10);
-    if(day!==last){html+=`<div class="day">${day} 공고</div>`;last=day;}
-    const d=dday(n.close_date);
-    let dd;
-    if(d===null)dd='<div class="dd x">—</div>';
-    else if(d<0)dd='<div class="dd x">마감</div>';
-    else dd=`<div class="dd${d<=3?" u":""}">D-${d}<small>${n.close_date.slice(5,10)}</small></div>`;
-    const tags=(n.tags||"").split(",").filter(Boolean).map(t=>`<span class="tag ${t}">${t}</span>`).join("");
-    const pre=n.notice_kind==="사전규격"?'<span class="tag pre">사전규격</span>':"";
-    const nw=n.first_seen===today?'<span class="tag new">NEW</span>':"";
-    const meta=[n.institution, n.demand_institution&&n.demand_institution!==n.institution?n.demand_institution:"",
-      n.close_date?(n.notice_kind==="사전규격"?"의견마감 ":"마감 ")+n.close_date:"",
-      fmtWon(n.estimated_price||n.budget), (n.award_method||"").replace(/^(.+)-\1$/,"$1"), n.mk].filter((x,i,a)=>x&&a.indexOf(x)===i);
+  counts();
+  const rows=DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).sort((a,b)=>(b.notice_date||"").localeCompare(a.notice_date||""));
+  $("vtitle").firstChild.textContent=VIEWS[S.view]+(S.tag?" · "+S.tag:"")+" ";
+  $("count").textContent=rows.length.toLocaleString()+"건";
+  $("pgl").textContent=rows.length?`1–${rows.length.toLocaleString()} / ${rows.length.toLocaleString()}건`:"";
+  const tb=$("tb");
+  if(!rows.length){tb.innerHTML='<tr><td colspan="6" class="empty">조건에 맞는 공고가 없습니다.</td></tr>';return;}
+  tb.innerHTML=rows.map(n=>{
+    const d=n.dd;
+    const dc=d===null?'<span class="d">—</span>':d<0?'<span class="d">마감</span>':`<span class="d${d<=3?' u':d<=7?' m':''}">D-${d}<small>${n.close_date.slice(5,10)}</small></span>`;
+    const tags=(n.tags||"").split(",").filter(Boolean).map(t=>`<span class="lz ${t}">${t}</span>`).join("");
     let title;
     if(n.url)title=`<a class="t" href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.title)}</a>`;
-    else if(n.notice_kind==="사전규격")title=`<a class="t" href="https://www.g2b.go.kr/" target="_blank" rel="noopener" data-copy="${esc(n.notice_no||"")}" title="클릭하면 등록번호를 복사하고 나라장터를 엽니다">${esc(n.title)}</a>`;
-    else title=`<span class="t">${esc(n.title)}</span>`;
-    if(n.notice_kind==="사전규격"&&n.notice_no)meta.unshift("등록번호 "+n.notice_no);
-    html+=`<div class="row">${dd}<div>${nw}${tags}${pre}${title}<div class="m"><span class="cat">${esc(n.category||"")}</span>${meta.map(x=>`<span>${esc(x)}</span>`).join("")}</div></div></div>`;
-  }
-  el.innerHTML=html;
+    else if(n.isPre)title=`<a class="t" href="https://www.g2b.go.kr/" target="_blank" rel="noopener" data-copy="${esc(n.notice_no||"")}" title="클릭하면 등록번호를 복사하고 나라장터를 엽니다">${esc(n.title)}</a>`;
+    else title=`<span class="t x">${esc(n.title)}</span>`;
+    const inst=esc(n.institution||"")+(n.demand_institution&&n.demand_institution!==n.institution?`<div class="sub">${esc(n.demand_institution)}</div>`:"");
+    const extra=n.isPre&&n.notice_no?`<span class="kw">등록번호 ${esc(n.notice_no)}</span>`:"";
+    return `<tr><td class="dcell">${dc}</td><td class="tcell">${n.isNew?'<span class="lz new">NEW</span>':''}${tags}${n.isPre?'<span class="lz pre">사전규격</span>':''}${title}${extra?" "+extra:""}</td><td class="c">${inst}</td><td class="c cat">${esc(n.category||"")}</td><td class="r">${fmtWon(n.estimated_price||n.budget)}</td><td class="kw">${esc(n.mk)}</td></tr>`;
+  }).join("");
 }
+
 function syncUI(){
-  $("q").value=S.q; $("matched").checked=S.matched; $("open").checked=S.open;
-  for(const [id,key,attr] of [["cats","cat","cat"],["tags","tag","tag"],["kinds","kind","kind"]])
-    document.querySelectorAll(`#${id} button`).forEach(b=>b.classList.toggle("on",b.dataset[attr]===S[key]));
+  document.querySelectorAll("#nav [data-view]").forEach(b=>b.classList.toggle("on",b.dataset.view===S.view));
+  document.querySelectorAll("#nav [data-tag]").forEach(b=>b.classList.toggle("on",b.dataset.tag===S.tag));
+  $("q").value=S.q;$("cat").value=S.cat;$("kind").value=S.kind;$("open").value=S.open;
+  document.body.classList.toggle("compact",S.dens==="comp");$("dComp").classList.toggle("on",S.dens==="comp");$("dComf").classList.toggle("on",S.dens!=="comp");
+  $("mnav").innerHTML=Object.entries(VIEWS).map(([v,l])=>`<button data-view="${v}" class="${v===S.view?'on':''}">${l}<span>${$("n-"+v).textContent}</span></button>`).join("")+["LH","GH","IH","SH"].map(t=>`<button data-tag="${t}" class="${t===S.tag?'on':''}">${t}</button>`).join("");
 }
 function fillKw(){$("kwInc").value=KW.include.join("\n");$("kwExc").value=KW.exclude.join("\n");}
-const doSearch=()=>{S.q=$("q").value;save(LS_S,S);render();};
-$("q").addEventListener("keydown",e=>{if(e.key==="Enter")doSearch();});
-$("q").addEventListener("search",()=>{if(!$("q").value)doSearch();});  // x 버튼으로 지웠을 때
-$("btnSearch").onclick=doSearch;
-$("matched").addEventListener("change",e=>{S.matched=e.target.checked;save(LS_S,S);render();});
-$("open").addEventListener("change",e=>{S.open=e.target.checked;save(LS_S,S);render();});
-for(const [id,key,attr] of [["cats","cat","cat"],["tags","tag","tag"],["kinds","kind","kind"]]){
-  $(id).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S[key]=b.dataset[attr];save(LS_S,S);syncUI();render();});
-}
-$("btnKw").onclick=()=>$("panel").classList.toggle("open");
-$("btnClose").onclick=()=>$("panel").classList.remove("open");
-$("btnSave").onclick=()=>{
-  KW={include:$("kwInc").value.split("\n").map(s=>s.trim()).filter(Boolean),
-      exclude:$("kwExc").value.split("\n").map(s=>s.trim()).filter(Boolean)};
-  save(LS_KW,KW); judgeAll(); render();
-  $("kwMsg").textContent="저장됨"; setTimeout(()=>$("kwMsg").textContent="",2500);
-};
-$("btnReset").onclick=()=>{KW=JSON.parse(JSON.stringify(DEFAULT_KW));localStorage.removeItem(LS_KW);fillKw();judgeAll();render();$("kwMsg").textContent="기본값으로 되돌림";setTimeout(()=>$("kwMsg").textContent="",2500);};
-$("list").addEventListener("click",e=>{
-  const a=e.target.closest("a[data-copy]");if(!a)return;
-  navigator.clipboard&&navigator.clipboard.writeText(a.dataset.copy).catch(()=>{});
-  const c=$("count"),old=c.textContent;c.textContent="등록번호 복사됨 — 나라장터 사전규격 검색창에 붙여넣기";setTimeout(()=>c.textContent=old,4000);
+function update(){save(LS_S,S);render();syncUI();}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");
+  if(b&&b.dataset.view!==undefined){S.view=b.dataset.view;update();return;}
+  if(b&&b.dataset.tag!==undefined){S.tag=(S.tag===b.dataset.tag&&b.closest("#mnav"))?"":b.dataset.tag;update();return;}
+  const a=e.target.closest("a[data-copy]");
+  if(a){navigator.clipboard&&navigator.clipboard.writeText(a.dataset.copy).catch(()=>{});const c=$("count"),o=c.textContent;c.textContent="등록번호 복사됨 — 나라장터 사전규격 검색창에 붙여넣기";setTimeout(()=>c.textContent=o,4000);}
 });
-fillKw(); syncUI(); judgeAll(); render();
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){S.q=$("q").value;update();}});
+$("q").addEventListener("search",()=>{if(!$("q").value){S.q="";update();}});
+document.addEventListener("keydown",e=>{if(e.key==="/"&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)){e.preventDefault();$("q").focus();}});
+for(const id of ["cat","kind","open"])$(id).addEventListener("change",()=>{S[id]=$(id).value;update();});
+$("dComp").onclick=()=>{S.dens="comp";update();};$("dComf").onclick=()=>{S.dens="comf";update();};
+const togglePanel=()=>{$("panel").classList.toggle("open");};
+$("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>$("panel").classList.remove("open");
+$("btnSave").onclick=()=>{KW={include:$("kwInc").value.split("\n").map(s=>s.trim()).filter(Boolean),exclude:$("kwExc").value.split("\n").map(s=>s.trim()).filter(Boolean)};save(LS_KW,KW);judgeAll();update();$("kwMsg").textContent="저장됨";setTimeout(()=>$("kwMsg").textContent="",2500);};
+const reset=()=>{KW=JSON.parse(JSON.stringify(DEFAULT_KW));localStorage.removeItem(LS_KW);fillKw();judgeAll();update();$("kwMsg").textContent="회사 기본값으로 되돌림";setTimeout(()=>$("kwMsg").textContent="",2500);};
+$("btnReset").onclick=reset;$("btnReset2").onclick=reset;
+fillKw();judgeAll();render();syncUI();
 </script>
 </body></html>
