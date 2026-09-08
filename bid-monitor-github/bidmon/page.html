@@ -92,7 +92,7 @@ textarea{width:100%;height:170px;font:inherit;font-size:13px;line-height:1.5;bor
 <header>
 <div class="bar">
   <h1>입찰공고<small id="asof">__DATE__ 갱신</small></h1>
-  <input type="search" id="q" placeholder="공고명 검색 후 엔터"><button class="a q" id="btnSearch">검색</button>
+  <input type="search" id="q" placeholder="공고명 또는 발주처 검색 후 엔터"><button class="a q" id="btnSearch">검색</button>
   <label class="chk"><input type="checkbox" id="matched">관심 공고만</label>
   <label class="chk"><input type="checkbox" id="open" checked>마감 지난 것 숨기기</label>
   <div class="right">
@@ -156,7 +156,7 @@ function render(){
     if(S.kind==="pre"&&n.notice_kind!=="사전규격")return false;
     if(S.kind==="bid"&&n.notice_kind==="사전규격")return false;
     if(S.open){const d=dday(n.close_date);if(d!==null&&d<0)return false;}
-    if(q&&!norm(n.title).toLowerCase().includes(q))return false;
+    if(q&&!norm(n.title+" "+(n.institution||"")+" "+(n.demand_institution||"")).toLowerCase().includes(q))return false;
     return true;
   });
   $("count").textContent=rows.length+"건 / 전체 "+DATA.length+"건";
