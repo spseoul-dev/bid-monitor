@@ -3,8 +3,10 @@
 - 이전 index.html 에 담긴 공고를 읽어와서, 최근 며칠치만 새로 받아 합친다 (증분 수집)
 - 수집이 0건이면 빈 페이지를 올리지 않고 실패 처리 (이전 페이지 유지)
 """
+import hashlib
 import json
 import logging
+import os
 import re
 import sys
 from datetime import datetime, timedelta
@@ -79,10 +81,20 @@ def main():
     seen = {k: v for k, v in seen.items() if v >= (now_kst() - timedelta(days=60)).strftime("%Y-%m-%d")}
 
     kw = {"include": cfg["filters"]["include_keywords"], "exclude": cfg["filters"]["exclude_keywords"]}
+    # config.yaml 에서 filters 앞부분(주석·기타 설정)을 그대로 보존 → 관리자 모드에서 파일 재생성 시 사용
+    raw = (ROOT / "config.yaml").read_text(encoding="utf-8")
+    head = raw.split("filters:")[0] if "filters:" in raw else ""
+    admin_hash = os.getenv("ADMIN_PW_HASH", "").strip() or hashlib.sha256(
+        (cfg.get("admin_password") or "sps-admin").encode()).hexdigest()
     now = now_kst()
     html = ((ROOT / "bidmon" / "page.html").read_text(encoding="utf-8")
             .replace("__DATA__", json.dumps(data, ensure_ascii=False, separators=(",", ":")))
             .replace("__KW__", json.dumps(kw, ensure_ascii=False))
+            .replace("__CFGHEAD__", json.dumps(head, ensure_ascii=False))
+            .replace("__ADMIN_HASH__", admin_hash)
+            .replace("__GH_REPO__", cfg.get("github_repo", ""))
+            .replace("__GH_PATH__", cfg.get("github_config_path", ""))
+            .replace("__TOKEN_ENC__", str(cfg.get("admin_token_enc", "") or ""))
             .replace("__DATE__", now.strftime("%Y-%m-%d %H:%M"))
             .replace("__NOW__", now.strftime("%Y-%m-%dT%H:%M:%S")))
     DOCS.mkdir(exist_ok=True)

@@ -65,7 +65,13 @@ select{border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inher
 .pin h2{font-size:13.5px;margin:0 0 4px;font-weight:600}.pin p{margin:0 0 6px;font-size:12.5px;color:var(--ink2)}
 textarea{width:100%;height:150px;font:inherit;font-size:13px;line-height:1.5;border:1px solid var(--line);border-radius:4px;padding:8px 10px;resize:vertical;background:var(--bg);color:var(--ink)}
 .pin .act{grid-column:1/-1;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.msg{font-size:13px;color:var(--newfg)}.note{font-size:12px;color:var(--ink3);grid-column:1/-1}
+.msg{font-size:13px;color:var(--newfg)}
+.msg.err{color:var(--warn)}
+.phd{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.phd b{font-size:14px}.phd span{font-size:12.5px;color:var(--ink3)}
+.phd .btn{margin-left:auto}
+#panel.admin{background:var(--midbg)}
+#panel.admin .phd b{color:var(--mid)}.note{font-size:12px;color:var(--ink3);grid-column:1/-1}
 
 /* ── 표 ── */
 .wrap{padding:16px 24px 40px}
@@ -162,10 +168,10 @@ body.compact .sub{display:none}
   </div>
   <div class="mnav" id="mnav"></div>
   <div id="panel"><div class="pin">
+    <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnTok" hidden>GitHub 연결</button><button class="btn" id="btnMode">회사 기본값 편집</button></div>
     <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
     <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
-    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">회사 기본값으로</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span></div>
-    <div class="note">키워드와 필터는 이 브라우저에만 저장됩니다. 다른 PC나 브라우저에서는 회사 기본값부터 시작합니다.</div>
+    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 불러오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span></div>
   </div></div>
   <div class="wrap">
     <div class="card"><table>
@@ -180,6 +186,7 @@ body.compact .sub{display:none}
 const DATA=__DATA__;
 const DEFAULT_KW=__KW__;
 const BUILT="__NOW__";
+const CONFIG_HEAD=__CFGHEAD__;
 const NOW=new Date(BUILT);
 const TODAY=BUILT.slice(0,10);
 const LS_KW="bidmon.kw",LS_S="bidmon.filters2";
@@ -267,10 +274,106 @@ document.addEventListener("keydown",e=>{if(e.key==="/"&&!["INPUT","TEXTAREA","SE
 for(const id of ["cat","kind","open"])$(id).addEventListener("change",()=>{S[id]=$(id).value;update();});
 $("dComp").onclick=()=>{S.dens="comp";update();};$("dComf").onclick=()=>{S.dens="comf";update();};
 const togglePanel=()=>{$("panel").classList.toggle("open");};
-$("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>$("panel").classList.remove("open");
-$("btnSave").onclick=()=>{KW={include:$("kwInc").value.split("\n").map(s=>s.trim()).filter(Boolean),exclude:$("kwExc").value.split("\n").map(s=>s.trim()).filter(Boolean)};save(LS_KW,KW);judgeAll();update();$("kwMsg").textContent="저장됨";setTimeout(()=>$("kwMsg").textContent="",2500);};
+$("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>{if(ADMIN)setMode(false);$("panel").classList.remove("open");};
+$("btnSave").onclick=()=>{
+  if(ADMIN){saveDefaults();return;}
+  KW=readBoxes();save(LS_KW,KW);judgeAll();update();
+  $("kwMsg").textContent="저장됨";setTimeout(()=>$("kwMsg").textContent="",2500);
+};
 const reset=()=>{KW=JSON.parse(JSON.stringify(DEFAULT_KW));localStorage.removeItem(LS_KW);fillKw();judgeAll();update();$("kwMsg").textContent="회사 기본값으로 되돌림";setTimeout(()=>$("kwMsg").textContent="",2500);};
 $("btnReset").onclick=reset;$("btnReset2").onclick=reset;
+
+/* ── 회사 기본값 편집 모드 (비밀번호를 아는 사람 누구나) ── */
+const ADMIN_HASH="__ADMIN_HASH__";
+const GH_REPO="__GH_REPO__", GH_PATH="__GH_PATH__";
+let TOKEN_ENC="__TOKEN_ENC__";
+let ADMIN=false, DRAFT=null, TOKEN="", HEAD=CONFIG_HEAD||"";
+
+const enc=new TextEncoder(), dec=new TextDecoder();
+async function sha256(t){const b=await crypto.subtle.digest("SHA-256",enc.encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");}
+const toB64=u8=>btoa(String.fromCharCode(...u8));
+const fromB64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function keyFrom(pw,salt){
+  const base=await crypto.subtle.importKey("raw",enc.encode(pw),"PBKDF2",false,["deriveKey"]);
+  return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+}
+async function lock(text,pw){
+  const salt=crypto.getRandomValues(new Uint8Array(16)), iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM",iv},await keyFrom(pw,salt),enc.encode(text)));
+  return [toB64(salt),toB64(iv),toB64(ct)].join(".");
+}
+async function unlock(blob,pw){
+  const [s1,s2,s3]=blob.split(".");
+  const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:fromB64(s2)},await keyFrom(pw,fromB64(s1)),fromB64(s3));
+  return dec.decode(pt);
+}
+
+const readBoxes=()=>({include:$("kwInc").value.split("\n").map(s=>s.trim()).filter(Boolean),exclude:$("kwExc").value.split("\n").map(s=>s.trim()).filter(Boolean)});
+function setMode(on){
+  ADMIN=on;
+  $("panel").classList.toggle("admin",on);
+  $("pTitle").textContent=on?"회사 기본값 (모두에게 적용)":"내 관심 키워드";
+  $("pDesc").textContent=on?"저장하면 다음 수집부터 모두의 화면에 적용됩니다.":"이 브라우저에만 저장됩니다.";
+  $("btnMode").textContent=on?"내 키워드로 돌아가기":"회사 기본값 편집";
+  $("btnSave").textContent=on?"회사 기본값 저장":"저장";
+  $("btnReset2").hidden=on;$("btnTok").hidden=!on;
+  $("btnTok").textContent=TOKEN?"GitHub 연결됨 ✓":"GitHub 연결 필요";
+  if(on){DRAFT=readBoxes();$("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");}
+  else{const d=DRAFT||KW;$("kwInc").value=d.include.join("\n");$("kwExc").value=d.exclude.join("\n");DRAFT=null;TOKEN="";}
+}
+let PW="";
+$("btnMode").onclick=async()=>{
+  if(ADMIN){setMode(false);return;}
+  const pw=prompt("회사 기본값 편집 — 비밀번호");
+  if(pw===null)return;
+  if(await sha256(pw)!==ADMIN_HASH){alert("비밀번호가 맞지 않습니다.");return;}
+  PW=pw; TOKEN="";
+  if(TOKEN_ENC){try{TOKEN=await unlock(TOKEN_ENC,pw);}catch(e){}}
+  setMode(true);
+};
+$("btnTok").onclick=async()=>{
+  const t=prompt("GitHub 토큰을 붙여넣으세요.\n한 번만 등록하면, 이후에는 비밀번호를 아는 누구나 저장할 수 있습니다.\n\ngithub.com → Settings → Developer settings →\nFine-grained tokens → bid-monitor / Contents: Read and write",TOKEN);
+  if(t===null||!t.trim())return;
+  TOKEN=t.trim(); TOKEN_ENC=await lock(TOKEN,PW);
+  $("btnTok").textContent="GitHub 연결됨 ✓";
+  $("kwMsg").className="msg";$("kwMsg").textContent="토큰 등록됨 — 저장을 누르면 함께 반영됩니다";
+};
+
+function buildYaml(){
+  const {include:inc,exclude:exc}=readBoxes();
+  let head=HEAD.replace(/\r/g,"").replace(/^admin_token_enc:.*\n/m,"");
+  if(TOKEN_ENC)head=head.replace(/(admin_password:.*\n)/,"$1admin_token_enc: "+TOKEN_ENC+"\n");
+  return head+"filters:\n  include_keywords:\n"+inc.map(k=>"    - "+k+"\n").join("")
+    +"  exclude_keywords:\n"+exc.map(k=>"    - "+k+"\n").join("");
+}
+function download(y){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([y],{type:"text/yaml;charset=utf-8"}));
+  a.download="config.yaml";a.click();URL.revokeObjectURL(a.href);
+}
+const b64=str=>btoa(String.fromCharCode(...enc.encode(str)));
+async function saveDefaults(){
+  const y=buildYaml();
+  if(!TOKEN){alert("GitHub 연결이 필요합니다. 위의 [GitHub 연결 필요] 버튼을 눌러 토큰을 한 번 등록해 주세요.");return;}
+  const msg=$("kwMsg"); msg.className="msg"; msg.textContent="저장 중…";
+  const H={Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
+  const url=`https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`;
+  try{
+    const cur=await fetch(url+"?ref=main",{headers:H});
+    if(cur.status===401||cur.status===403)throw new Error("토큰이 거부되었습니다. 권한(Contents: Read and write)과 만료일을 확인하세요.");
+    const sha=cur.ok?(await cur.json()).sha:undefined;
+    const put=await fetch(url,{method:"PUT",headers:{...H,"Content-Type":"application/json"},
+      body:JSON.stringify({message:"회사 기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
+    if(!put.ok)throw new Error("저장 실패 ("+put.status+") "+(await put.text()).slice(0,120));
+    HEAD=buildYaml().split("filters:")[0];
+    msg.textContent="저장됨 — 다음 수집부터 모두에게 적용됩니다";
+    setTimeout(()=>msg.textContent="",6000);
+  }catch(e){
+    msg.className="msg err";
+    msg.textContent=String(e.message||e)+" · 파일로 대신 내려받습니다";
+    download(y);
+  }
+}
 fillKw();judgeAll();render();syncUI();
 </script>
 </body></html>
