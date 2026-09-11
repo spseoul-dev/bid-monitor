@@ -168,7 +168,7 @@ body.compact .sub{display:none}
   </div>
   <div class="mnav" id="mnav"></div>
   <div id="panel"><div class="pin">
-    <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnTok" hidden>GitHub 연결</button><button class="btn" id="btnMode">회사 기본값 편집</button></div>
+    <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnTok" hidden>GitHub 연결</button><button class="btn" id="btnMode">기본값 편집</button></div>
     <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
     <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
     <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 불러오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span></div>
@@ -312,10 +312,10 @@ const readBoxes=()=>({include:$("kwInc").value.split("\n").map(s=>s.trim()).filt
 function setMode(on){
   ADMIN=on;
   $("panel").classList.toggle("admin",on);
-  $("pTitle").textContent=on?"회사 기본값 (모두에게 적용)":"내 관심 키워드";
+  $("pTitle").textContent=on?"기본값 (모두에게 적용)":"내 관심 키워드";
   $("pDesc").textContent=on?"저장하면 다음 수집부터 모두의 화면에 적용됩니다.":"이 브라우저에만 저장됩니다.";
-  $("btnMode").textContent=on?"내 키워드로 돌아가기":"회사 기본값 편집";
-  $("btnSave").textContent=on?"회사 기본값 저장":"저장";
+  $("btnMode").textContent=on?"내 키워드로 돌아가기":"기본값 편집";
+  $("btnSave").textContent=on?"기본값 저장":"저장";
   $("btnReset2").hidden=on;$("btnTok").hidden=!on;
   $("btnTok").textContent=TOKEN?"GitHub 연결됨 ✓":"GitHub 연결 필요";
   if(on){DRAFT=readBoxes();$("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");}
@@ -324,7 +324,7 @@ function setMode(on){
 let PW="";
 $("btnMode").onclick=async()=>{
   if(ADMIN){setMode(false);return;}
-  const pw=prompt("회사 기본값 편집 — 비밀번호");
+  const pw=prompt("기본값 편집 — 비밀번호");
   if(pw===null)return;
   if(await sha256(pw)!==ADMIN_HASH){alert("비밀번호가 맞지 않습니다.");return;}
   PW=pw; TOKEN="";
