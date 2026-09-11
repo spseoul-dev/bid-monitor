@@ -4,7 +4,7 @@
 # 관리자 모드 비밀번호 (페이지에서 회사 기본값 파일을 만들 때 필요)
 # 주의: 이 값 자체는 페이지에 실리지 않고, 해시(되돌릴 수 없는 값)만 실립니다.
 admin_password: sps123
-admin_token_enc: +FsFPB8g4+IWSUS1QY1mXQ==.MwjydCfjnbMff87M.Vh5bYn1xX1s+IRWFkOs6sgJHrQEQWkOL5XL+2g2wtw43rTTV7++hKfbZBou7fsctMpkCZCRNLOJwhnwfNCLnpQG5B9lJKDDXocemOMj2hhv+iePidTiHi3afDQmsjirkwUCE54GVS6Uex3BmXQ==
+admin_token_enc: tECnTyPoz2fb0pyIJfnAwQ==.3jC9c5jpmxI4GBdA.AnPXfD4uF6LOLdSd4rOK7d7NNHLtw52QCUt+7pbOd/GBpScIYyuMZAzSIyhQqxjDut++rF9HAG7KcS5TCdFDCcEw/Rr0Pi/+d2SpS0S7qfriEKRta9CDzJ3zmI5RAnccu3BcIlz+doyYN1oOWw==
 # 관리자 모드에서 이 파일을 직접 저장할 위치
 github_repo: spseoul-dev/bid-monitor
 github_config_path: bid-monitor-github/config.yaml
@@ -41,72 +41,68 @@ institutions:
 # ── 3) 관심 공고 기본 키워드 (각자 브라우저에서 바꿀 수 있음, 이건 '기본값') ──
 filters:
   include_keywords:
-    - 도시계획
+    - 설계공모
+    - 설계 공모
+    - 현상설계
+    - 국제설계
+    - 건축설계
+    - 건축기획
+    - 계획설계
+    - 기본설계
+    - 실시설계
+    - 설계용역
     - 도시재생
-    - 정비
-    - 공모
-    - 설계
-    - 개발
-    - 공간
-    - 구상
-    - 지구단위
-    - 재정비
-    - 타당성
-    - 활성화
-    - 기본계획
-    - 건축구상
-    - 공공주택
-    - 소규모주택
-    - 도시개발
-    - 마스터플랜
-    - 도시건축
-    - 도시건축통합
-    - 도시관리
-    - 종합계획
-    - 도시공간
-    - 건축공간
+    - 활성화계획
+    - 전략계획
     - 공간환경
+    - 마스터플랜
+    - 기본구상
+    - 개발구상
+    - 사업구상
+    - 기본계획
+    - 종합계획
+    - 발전계획
+    - 관리계획
+    - 정비계획
+    - 타당성
+    - 도시계획
+    - 도시기본계획
+    - 도시관리계획
+    - 도시설계
+    - 지구단위계획
+    - 생활권
+    - 15분도시
+    - 15분 도시
+    - 경관
+    - 가로환경
+    - 공공디자인
+    - 도시브랜딩
+    - 브랜딩
+    - 농촌공간
+    - 새뜰마을
+    - 어촌뉴딜
+    - 마을만들기
+    - 지방소멸
+    - 도심융합
+    - 도시개발
+    - 스마트시티
+    - 리모델링
+    - 주거환경개선
+    - 정주환경
+    - 소규모주택
+    - 공공건축물
+    - 높이관리
+    - 최고높이
+    - 역사문화
+    - 근대
+    - 보전
+    - 활용방안
+    - 가이드라인
+    - 실태조사
+    - 현황조사
+    - 개발전략
+    - 개선계획
+    - 환경개선
+    - 관리방안
+    - 로드맵
   exclude_keywords:
-    - 시공
-    - 측량
-    - 내진
-    - 전기
-    - 옹벽
-    - 하수도
-    - 상수도
-    - 하수관
-    - 상수관
-    - 배수
-    - 저수
-    - 급수
-    - 엘리베이터
-    - 축사
-    - 폐수
-    - 보수
-    - 도장
-    - 철거
-    - 조명
-    - cctv
-    - 임야
-    - 임목
-    - 방범
-    - 외벽
-    - 구매
-    - 청소
-    - 경비
-    - 감리
-    - 감독
-    - 산사태
-    - 산불
-    - 폐기물
-    - 콘크리트
-    - 드라이비트
-    - 재해
-    - 예방
-    - 서식
-    - 개축
-    - 지붕
-    - 케이블
-    - 홍보
-    - 마케팅
-    - 사이버
