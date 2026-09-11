@@ -237,7 +237,6 @@ function counts(){
   $("total").textContent=DATA.length.toLocaleString();
 }
 
-function countNow(){return DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).length;}
 function render(){
   counts();
   const rows=DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).sort((a,b)=>(b.notice_date||"").localeCompare(a.notice_date||""));
@@ -299,13 +298,10 @@ const togglePanel=()=>{$("panel").classList.toggle("open");};
 $("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>{if(ADMIN)setMode(false);$("panel").classList.remove("open");};
 $("btnSave").onclick=()=>{
   if(ADMIN){saveDefaults();return;}
-  const before=countNow();
   MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);
-  judgeAll();render();syncUI();save(LS_S,S);
-  const after=countNow();
-  $("kwMsg").className="msg";
-  $("kwMsg").textContent=`내 키워드로 저장됨 — ${before}건 → ${after}건`;
-  setTimeout(()=>$("kwMsg").textContent="",5000);
+  judgeAll();render();syncUI();
+  $("kwMsg").className="msg";$("kwMsg").textContent="저장됨";
+  setTimeout(()=>$("kwMsg").textContent="",3000);
 };
 $("btnReset2").onclick=()=>{
   $("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");
@@ -398,13 +394,9 @@ async function saveDefaults(){
         body:JSON.stringify({message:"기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
       if(put.ok){
         HEAD=y.split("filters:")[0];
-        const before=countNow();
         applyDefaults(readBoxes(),false);    // 편집 칸은 두고 목록만 즉시 갱신
-        const after=countNow();
-        msg.textContent=S.src==="default"
-          ? `저장됨 — 바로 적용 (${before}건 → ${after}건). 다른 분은 새로고침하면 보입니다`
-          : "저장됨 — 다만 지금 화면은 [내 키워드]를 쓰는 중이라 목록은 그대로입니다";
-        setTimeout(()=>msg.textContent="",8000);
+        msg.textContent=S.src==="default"?"저장됨":"저장됨 — 지금 화면은 [내 키워드] 사용 중";
+        setTimeout(()=>msg.textContent="",3000);
         return;
       }
       lastErr="("+put.status+") "+(await put.text()).slice(0,100);
