@@ -56,6 +56,7 @@ filters:
     - 마스터플랜
     - 도시건축
     - 종합계획
+    - 도시관리
   exclude_keywords:
     - 시공
     - 공사
