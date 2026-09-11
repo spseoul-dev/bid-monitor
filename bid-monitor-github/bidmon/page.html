@@ -57,6 +57,7 @@ select{border:1px solid var(--line);border-radius:4px;padding:6px 8px;font:inher
 .dens{display:flex;border:1px solid var(--line);border-radius:4px;overflow:hidden}
 .dens button{border:0;background:var(--panel);padding:5px 9px;font-size:13px;color:var(--ink3);line-height:1}
 .dens button.on{background:var(--hover);color:var(--ink)}
+#btnKw2{display:none}
 
 /* ── 키워드 패널 ── */
 #panel{display:none;background:var(--panel);border-bottom:1px solid var(--line)}
@@ -112,6 +113,7 @@ body.compact .sub{display:none}
   .search{width:100%}
   .right{margin-left:0;width:100%}
   .dens{display:none}
+  #btnKw2{display:inline-block}
   .mnav{display:flex;gap:4px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none;background:var(--panel);border-bottom:1px solid var(--line)}
   .mnav::-webkit-scrollbar{display:none}
   .mnav button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--ink2)}
@@ -148,9 +150,10 @@ body.compact .sub{display:none}
     <button data-tag="GH"><b><i class="dot" style="background:var(--gh)"></i>GH</b><span id="n-GH"></span></button>
     <button data-tag="IH"><b><i class="dot" style="background:var(--ih)"></i>IH</b><span id="n-IH"></span></button>
     <button data-tag="SH"><b><i class="dot" style="background:var(--sh)"></i>SH</b><span id="n-SH"></span></button>
-    <h4>설정</h4>
-    <button id="btnKw">내 관심 키워드</button>
-    <button id="btnReset">회사 기본값으로</button>
+    <h4>적용 중인 키워드</h4>
+    <button data-src="default">회사 기본값<span id="s-default"></span></button>
+    <button data-src="mine">내 키워드<span id="s-mine"></span></button>
+    <button id="btnKw">키워드 편집</button>
   </div>
   <div class="asof">__DATE__ 갱신<br>최근 30일 · <span id="total"></span>건</div>
 </aside>
@@ -197,14 +200,16 @@ const VIEWS={matched:"관심 공고",urgent:"마감 임박",new:"오늘 신규",
 const $=id=>document.getElementById(id);
 const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
-let KW=load(LS_KW,DEFAULT_KW);
-const S=Object.assign({view:"matched",tag:"",q:"",cat:"",kind:"",open:"1",dens:"comf"},load(LS_S,{}));
+const S=Object.assign({view:"matched",tag:"",q:"",cat:"",kind:"",open:"1",dens:"comf",src:"default"},load(LS_S,{}));
+let MYKW=load(LS_KW,null);
+if(!MYKW&&S.src==="mine")S.src="default";
+const curKW=()=>S.src==="mine"&&MYKW?MYKW:DEFAULT_KW;
 const norm=s=>String(s||"").replace(/\s/g,"");
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtWon=v=>v?Math.round(v/1e6).toLocaleString()+"백만":"";
 const dday=c=>{if(!c)return null;return Math.floor((new Date(c.replace(" ","T"))-NOW)/864e5);};
 
-function judge(n){const t=norm(n.title);const inc=KW.include.filter(k=>k&&t.includes(norm(k)));const exc=KW.exclude.some(k=>k&&t.includes(norm(k)));n.matched=inc.length>0&&!exc;n.mk=[...new Set(inc.map(norm))].join(", ");n.dd=dday(n.close_date);n.isNew=n.first_seen===TODAY;n.isPre=n.notice_kind==="사전규격";}
+function judge(n){const K=curKW();const t=norm(n.title);const inc=K.include.filter(k=>k&&t.includes(norm(k)));const exc=K.exclude.some(k=>k&&t.includes(norm(k)));n.matched=inc.length>0&&!exc;n.mk=[...new Set(inc.map(norm))].join(", ");n.dd=dday(n.close_date);n.isNew=n.first_seen===TODAY;n.isPre=n.notice_kind==="사전규격";}
 function judgeAll(){DATA.forEach(judge);}
 
 function base(n){
@@ -257,15 +262,26 @@ function render(){
 function syncUI(){
   document.querySelectorAll("#nav [data-view]").forEach(b=>b.classList.toggle("on",b.dataset.view===S.view));
   document.querySelectorAll("#nav [data-tag]").forEach(b=>b.classList.toggle("on",b.dataset.tag===S.tag));
+  syncSrc();
   $("q").value=S.q;$("cat").value=S.cat;$("kind").value=S.kind;$("open").value=S.open;
   document.body.classList.toggle("compact",S.dens==="comp");$("dComp").classList.toggle("on",S.dens==="comp");$("dComf").classList.toggle("on",S.dens!=="comp");
   $("mnav").innerHTML=Object.entries(VIEWS).map(([v,l])=>`<button data-view="${v}" class="${v===S.view?'on':''}">${l}<span>${$("n-"+v).textContent}</span></button>`).join("")+["LH","GH","IH","SH"].map(t=>`<button data-tag="${t}" class="${t===S.tag?'on':''}">${t}</button>`).join("");
 }
-function fillKw(){$("kwInc").value=KW.include.join("\n");$("kwExc").value=KW.exclude.join("\n");}
+function fillKw(){const K=curKW();$("kwInc").value=K.include.join("\n");$("kwExc").value=K.exclude.join("\n");}
+function syncSrc(){
+  document.querySelectorAll("#nav [data-src]").forEach(b=>b.classList.toggle("on",b.dataset.src===S.src));
+  $("s-default").textContent=S.src==="default"?"사용 중":"";
+  $("s-mine").textContent=S.src==="mine"?"사용 중":(MYKW?"저장됨":"");
+  if(!ADMIN){
+    $("pTitle").textContent=S.src==="mine"?"내 키워드":"회사 기본값";
+    $("pDesc").textContent=S.src==="mine"?"이 브라우저에만 저장됩니다.":"모두가 함께 쓰는 값입니다. 고치려면 [기본값 편집].";
+  }
+}
 function update(){save(LS_S,S);render();syncUI();}
 
 document.addEventListener("click",e=>{
   const b=e.target.closest("button");
+  if(b&&b.dataset.src!==undefined){S.src=b.dataset.src;save(LS_S,S);fillKw();judgeAll();update();return;}
   if(b&&b.dataset.view!==undefined){S.view=b.dataset.view;update();return;}
   if(b&&b.dataset.tag!==undefined){S.tag=(S.tag===b.dataset.tag&&b.closest("#mnav"))?"":b.dataset.tag;update();return;}
   const a=e.target.closest("a[data-copy]");
@@ -280,11 +296,11 @@ const togglePanel=()=>{$("panel").classList.toggle("open");};
 $("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>{if(ADMIN)setMode(false);$("panel").classList.remove("open");};
 $("btnSave").onclick=()=>{
   if(ADMIN){saveDefaults();return;}
-  KW=readBoxes();save(LS_KW,KW);judgeAll();update();
-  $("kwMsg").textContent="저장됨";setTimeout(()=>$("kwMsg").textContent="",2500);
+  MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);judgeAll();update();
+  $("kwMsg").textContent="내 키워드로 저장됨 — 바꾸기 전까지 계속 적용됩니다";setTimeout(()=>$("kwMsg").textContent="",4000);
 };
-const reset=()=>{KW=JSON.parse(JSON.stringify(DEFAULT_KW));localStorage.removeItem(LS_KW);fillKw();judgeAll();update();$("kwMsg").textContent="회사 기본값으로 되돌림";setTimeout(()=>$("kwMsg").textContent="",2500);};
-$("btnReset").onclick=reset;$("btnReset2").onclick=reset;
+const reset=()=>{S.src="default";save(LS_S,S);fillKw();judgeAll();update();$("kwMsg").textContent="회사 기본값을 사용합니다";setTimeout(()=>$("kwMsg").textContent="",3000);};
+$("btnReset2").onclick=reset;
 
 /* ── 회사 기본값 편집 모드 (비밀번호를 아는 사람 누구나) ── */
 const ADMIN_HASH="__ADMIN_HASH__";
@@ -319,10 +335,10 @@ function setMode(on){
   $("pDesc").textContent=on?"저장하면 다음 수집부터 모두의 화면에 적용됩니다.":"이 브라우저에만 저장됩니다.";
   $("btnMode").textContent=on?"내 키워드로 돌아가기":"기본값 편집";
   $("btnSave").textContent=on?"기본값 저장":"저장";
-  $("btnReset2").hidden=on;$("btnTok").hidden=!on;
+  $("btnReset2").hidden=on||S.src==="default";$("btnTok").hidden=!on;
   updTok();
   if(on){DRAFT=readBoxes();$("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");}
-  else{const d=DRAFT||KW;$("kwInc").value=d.include.join("\n");$("kwExc").value=d.exclude.join("\n");DRAFT=null;TOKEN="";}
+  else{const d=DRAFT||curKW();$("kwInc").value=d.include.join("\n");$("kwExc").value=d.exclude.join("\n");DRAFT=null;TOKEN="";syncSrc();}
 }
 let PW="";
 $("btnMode").onclick=async()=>{
@@ -390,7 +406,7 @@ async function saveDefaults(){
 }
 function applyDefaults(kw){
   DEFAULT_KW.include=kw.include.slice(); DEFAULT_KW.exclude=kw.exclude.slice();
-  if(!localStorage.getItem(LS_KW)){KW=JSON.parse(JSON.stringify(DEFAULT_KW));if(!ADMIN)fillKw();judgeAll();render();}  // 내 키워드를 따로 저장하지 않은 사람만 갱신
+  if(S.src==="default"&&!ADMIN){fillKw();judgeAll();render();}   // 기본값을 쓰는 사람만 갱신
 }
 /* 페이지를 열 때 최신 기본값을 GitHub 에서 직접 읽어옴 (수집을 기다리지 않아도 반영) */
 (async()=>{
