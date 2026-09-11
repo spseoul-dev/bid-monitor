@@ -70,6 +70,9 @@ textarea{width:100%;height:150px;font:inherit;font-size:13px;line-height:1.5;bor
 .phd{grid-column:1/-1;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .phd b{font-size:14px}.phd span{font-size:12.5px;color:var(--ink3)}
 .phd .btn{margin-left:auto}
+.tokwrap{margin-left:auto;font-size:12.5px;color:var(--ink3);cursor:pointer;white-space:nowrap}
+.tokwrap.need{color:#fff;background:var(--mid);border-radius:4px;padding:5px 12px;font-size:13px;font-weight:600}
+.tokwrap:hover{text-decoration:underline}
 #panel.admin{background:var(--midbg)}
 #panel.admin .phd b{color:var(--mid)}.note{font-size:12px;color:var(--ink3);grid-column:1/-1}
 
@@ -168,10 +171,10 @@ body.compact .sub{display:none}
   </div>
   <div class="mnav" id="mnav"></div>
   <div id="panel"><div class="pin">
-    <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnTok" hidden>GitHub 연결</button><button class="btn" id="btnMode">기본값 편집</button></div>
+    <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnMode">기본값 편집</button></div>
     <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
     <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
-    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 불러오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span></div>
+    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 불러오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span><span class="tokwrap" id="btnTok" hidden></span></div>
   </div></div>
   <div class="wrap">
     <div class="card"><table>
@@ -317,7 +320,7 @@ function setMode(on){
   $("btnMode").textContent=on?"내 키워드로 돌아가기":"기본값 편집";
   $("btnSave").textContent=on?"기본값 저장":"저장";
   $("btnReset2").hidden=on;$("btnTok").hidden=!on;
-  $("btnTok").textContent=TOKEN?"GitHub 연결됨 ✓":"GitHub 연결 필요";
+  updTok();
   if(on){DRAFT=readBoxes();$("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");}
   else{const d=DRAFT||KW;$("kwInc").value=d.include.join("\n");$("kwExc").value=d.exclude.join("\n");DRAFT=null;TOKEN="";}
 }
@@ -331,11 +334,12 @@ $("btnMode").onclick=async()=>{
   if(TOKEN_ENC){try{TOKEN=await unlock(TOKEN_ENC,pw);}catch(e){}}
   setMode(true);
 };
+function updTok(){const e=$("btnTok");e.textContent=TOKEN?"GitHub 연결됨 ✓":"GitHub 연결 필요";e.classList.toggle("need",!TOKEN);}
 $("btnTok").onclick=async()=>{
   const t=prompt("GitHub 토큰을 붙여넣으세요.\n한 번만 등록하면, 이후에는 비밀번호를 아는 누구나 저장할 수 있습니다.\n\ngithub.com → Settings → Developer settings →\nFine-grained tokens → bid-monitor / Contents: Read and write",TOKEN);
   if(t===null||!t.trim())return;
   TOKEN=t.trim(); TOKEN_ENC=await lock(TOKEN,PW);
-  $("btnTok").textContent="GitHub 연결됨 ✓";
+  updTok();
   $("kwMsg").className="msg";$("kwMsg").textContent="토큰 등록됨 — 저장을 누르면 함께 반영됩니다";
 };
 
@@ -354,20 +358,29 @@ function download(y){
 const b64=str=>btoa(String.fromCharCode(...enc.encode(str)));
 async function saveDefaults(){
   const y=buildYaml();
-  if(!TOKEN){alert("GitHub 연결이 필요합니다. 위의 [GitHub 연결 필요] 버튼을 눌러 토큰을 한 번 등록해 주세요.");return;}
+  if(!TOKEN){alert("GitHub 연결이 필요합니다. 아래 [GitHub 연결 필요]를 눌러 토큰을 한 번 등록해 주세요.");return;}
   const msg=$("kwMsg"); msg.className="msg"; msg.textContent="저장 중…";
   const H={Authorization:"Bearer "+TOKEN,Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"};
   const url=`https://api.github.com/repos/${GH_REPO}/contents/${GH_PATH}`;
   try{
-    const cur=await fetch(url+"?ref=main",{headers:H});
-    if(cur.status===401||cur.status===403)throw new Error("토큰이 거부되었습니다. 권한(Contents: Read and write)과 만료일을 확인하세요.");
-    const sha=cur.ok?(await cur.json()).sha:undefined;
-    const put=await fetch(url,{method:"PUT",headers:{...H,"Content-Type":"application/json"},
-      body:JSON.stringify({message:"회사 기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
-    if(!put.ok)throw new Error("저장 실패 ("+put.status+") "+(await put.text()).slice(0,120));
-    HEAD=buildYaml().split("filters:")[0];
-    msg.textContent="저장됨 — 다음 수집부터 모두에게 적용됩니다";
-    setTimeout(()=>msg.textContent="",6000);
+    let lastErr="";
+    for(let i=0;i<3;i++){                       // 409(충돌) 나면 최신 버전 다시 읽고 재시도
+      const cur=await fetch(url+"?ref=main&t="+Date.now(),{headers:H,cache:"no-store"});
+      if(cur.status===401||cur.status===403)throw new Error("토큰이 거부되었습니다. 권한(Contents: Read and write)과 만료일을 확인하세요.");
+      const sha=cur.ok?(await cur.json()).sha:undefined;
+      const put=await fetch(url,{method:"PUT",headers:{...H,"Content-Type":"application/json"},
+        body:JSON.stringify({message:"기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
+      if(put.ok){
+        HEAD=y.split("filters:")[0];
+        msg.textContent="저장됨 — 다음 수집부터 모두에게 적용됩니다";
+        setTimeout(()=>msg.textContent="",6000);
+        return;
+      }
+      lastErr="("+put.status+") "+(await put.text()).slice(0,100);
+      if(put.status!==409)break;
+      await new Promise(r=>setTimeout(r,700));
+    }
+    throw new Error("저장 실패 "+lastErr);
   }catch(e){
     msg.className="msg err";
     msg.textContent=String(e.message||e)+" · 파일로 대신 내려받습니다";
