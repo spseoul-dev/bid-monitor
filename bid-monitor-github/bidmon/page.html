@@ -372,8 +372,9 @@ async function saveDefaults(){
         body:JSON.stringify({message:"기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
       if(put.ok){
         HEAD=y.split("filters:")[0];
-        msg.textContent="저장됨 — 다음 수집부터 모두에게 적용됩니다";
-        setTimeout(()=>msg.textContent="",6000);
+        applyDefaults(readBoxes());          // 바로 화면에 반영
+        msg.textContent="저장됨 — 바로 적용되었습니다 (다른 분은 새로고침하면 보입니다)";
+        setTimeout(()=>msg.textContent="",7000);
         return;
       }
       lastErr="("+put.status+") "+(await put.text()).slice(0,100);
@@ -387,6 +388,27 @@ async function saveDefaults(){
     download(y);
   }
 }
+function applyDefaults(kw){
+  DEFAULT_KW.include=kw.include.slice(); DEFAULT_KW.exclude=kw.exclude.slice();
+  if(!localStorage.getItem(LS_KW)){KW=JSON.parse(JSON.stringify(DEFAULT_KW));if(!ADMIN)fillKw();judgeAll();render();}  // 내 키워드를 따로 저장하지 않은 사람만 갱신
+}
+/* 페이지를 열 때 최신 기본값을 GitHub 에서 직접 읽어옴 (수집을 기다리지 않아도 반영) */
+(async()=>{
+  if(!GH_REPO||!GH_PATH)return;
+  try{
+    const r=await fetch(`https://raw.githubusercontent.com/${GH_REPO}/main/${GH_PATH}?t=`+Date.now(),{cache:"no-store"});
+    if(!r.ok)return;
+    const txt=await r.text();
+    const grab=(name)=>{
+      const m=txt.match(new RegExp("\\n  "+name+":\\n([\\s\\S]*?)(?=\\n  \\w|\\n\\w|$)"));
+      return m?m[1].split("\n").map(l=>l.trim()).filter(l=>l.startsWith("- ")).map(l=>l.slice(2).trim().replace(/^["']|["']$/g,"")):null;
+    };
+    const inc=grab("include_keywords"), exc=grab("exclude_keywords");
+    if(inc&&exc&&inc.length&&(inc.join("|")!==DEFAULT_KW.include.join("|")||exc.join("|")!==DEFAULT_KW.exclude.join("|"))){
+      applyDefaults({include:inc,exclude:exc});
+    }
+  }catch(e){}
+})();
 fillKw();judgeAll();render();syncUI();
 </script>
 </body></html>
