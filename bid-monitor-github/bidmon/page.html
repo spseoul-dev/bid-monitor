@@ -177,7 +177,7 @@ body.compact .sub{display:none}
     <div class="phd"><b id="pTitle">내 관심 키워드</b><span id="pDesc">이 브라우저에만 저장됩니다.</span><button class="btn" id="btnMode">기본값 편집</button></div>
     <div><h2>포함 키워드</h2><p>공고명에 하나라도 있으면 관심 공고. 한 줄에 하나.</p><textarea id="kwInc"></textarea></div>
     <div><h2>제외 키워드</h2><p>공고명에 있으면 제외. 한 줄에 하나.</p><textarea id="kwExc"></textarea></div>
-    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 불러오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span><span class="tokwrap" id="btnTok" hidden></span></div>
+    <div class="act"><button class="btn p" id="btnSave">저장</button><button class="btn" id="btnReset2">기본값 복사해오기</button><button class="btn" id="btnClose">닫기</button><span class="msg" id="kwMsg"></span><span class="tokwrap" id="btnTok" hidden></span></div>
   </div></div>
   <div class="wrap">
     <div class="card"><table>
@@ -202,8 +202,8 @@ const load=(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}};
 const S=Object.assign({view:"matched",tag:"",q:"",cat:"",kind:"",open:"1",dens:"comf",src:"default"},load(LS_S,{}));
 let MYKW=load(LS_KW,null);
-if(!MYKW&&S.src==="mine")S.src="default";
-const curKW=()=>S.src==="mine"&&MYKW?MYKW:DEFAULT_KW;
+const EMPTY_KW={include:[],exclude:[]};
+const curKW=()=>S.src==="mine"?(MYKW||EMPTY_KW):DEFAULT_KW;
 const norm=s=>String(s||"").replace(/\s/g,"");
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const fmtWon=v=>v?Math.round(v/1e6).toLocaleString()+"백만":"";
@@ -237,6 +237,7 @@ function counts(){
   $("total").textContent=DATA.length.toLocaleString();
 }
 
+function countNow(){return DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).length;}
 function render(){
   counts();
   const rows=DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).sort((a,b)=>(b.notice_date||"").localeCompare(a.notice_date||""));
@@ -244,7 +245,9 @@ function render(){
   $("count").textContent=rows.length.toLocaleString()+"건";
   $("pgl").textContent=rows.length?`1–${rows.length.toLocaleString()} / ${rows.length.toLocaleString()}건`:"";
   const tb=$("tb");
-  if(!rows.length){tb.innerHTML='<tr><td colspan="6" class="empty">조건에 맞는 공고가 없습니다.</td></tr>';return;}
+  if(!rows.length){
+    const msg=(S.src==="mine"&&!MYKW&&S.view!=="all")?"내 키워드가 비어 있습니다. 왼쪽 [키워드 편집]에서 키워드를 넣어 주세요.":"조건에 맞는 공고가 없습니다.";
+    tb.innerHTML='<tr><td colspan="6" class="empty">'+msg+'</td></tr>';return;}
   tb.innerHTML=rows.map(n=>{
     const d=n.dd;
     const dc=d===null?'<span class="d">—</span>':d<0?'<span class="d">마감</span>':`<span class="d${d<=3?' u':d<=7?' m':''}">D-${d}<small>${n.close_date.slice(5,10)}</small></span>`;
@@ -271,10 +274,10 @@ function fillKw(){const K=curKW();$("kwInc").value=K.include.join("\n");$("kwExc
 function syncSrc(){
   document.querySelectorAll("#nav [data-src]").forEach(b=>b.classList.toggle("on",b.dataset.src===S.src));
   $("s-default").textContent=S.src==="default"?"사용 중":"";
-  $("s-mine").textContent=S.src==="mine"?"사용 중":(MYKW?"저장됨":"");
+  $("s-mine").textContent=S.src==="mine"?"사용 중":(MYKW?"저장됨":"미설정");
   if(!ADMIN){
     $("pTitle").textContent=S.src==="mine"?"내 키워드":"회사 기본값";
-    $("pDesc").textContent=S.src==="mine"?"이 브라우저에만 저장됩니다.":"모두가 함께 쓰는 값입니다. 고치려면 [기본값 편집].";
+    $("pDesc").textContent=S.src==="mine"?(MYKW?"이 브라우저에만 저장됩니다.":"아직 비어 있습니다. 직접 입력하거나 [기본값 복사해오기].") :"모두가 함께 쓰는 값입니다. 고치려면 [기본값 편집].";
   }
 }
 function update(){save(LS_S,S);render();syncUI();}
@@ -296,11 +299,18 @@ const togglePanel=()=>{$("panel").classList.toggle("open");};
 $("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>{if(ADMIN)setMode(false);$("panel").classList.remove("open");};
 $("btnSave").onclick=()=>{
   if(ADMIN){saveDefaults();return;}
-  MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);judgeAll();update();
-  $("kwMsg").textContent="내 키워드로 저장됨 — 바꾸기 전까지 계속 적용됩니다";setTimeout(()=>$("kwMsg").textContent="",4000);
+  const before=countNow();
+  MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);
+  judgeAll();render();syncUI();save(LS_S,S);
+  const after=countNow();
+  $("kwMsg").className="msg";
+  $("kwMsg").textContent=`내 키워드로 저장됨 — ${before}건 → ${after}건`;
+  setTimeout(()=>$("kwMsg").textContent="",5000);
 };
-const reset=()=>{S.src="default";save(LS_S,S);fillKw();judgeAll();update();$("kwMsg").textContent="회사 기본값을 사용합니다";setTimeout(()=>$("kwMsg").textContent="",3000);};
-$("btnReset2").onclick=reset;
+$("btnReset2").onclick=()=>{
+  $("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");
+  $("kwMsg").className="msg";$("kwMsg").textContent="기본값을 가져왔습니다 — 고친 뒤 [저장]";setTimeout(()=>$("kwMsg").textContent="",4000);
+};
 
 /* ── 회사 기본값 편집 모드 (비밀번호를 아는 사람 누구나) ── */
 const ADMIN_HASH="__ADMIN_HASH__";
@@ -332,10 +342,10 @@ function setMode(on){
   ADMIN=on;
   $("panel").classList.toggle("admin",on);
   $("pTitle").textContent=on?"기본값 (모두에게 적용)":"내 관심 키워드";
-  $("pDesc").textContent=on?"저장하면 다음 수집부터 모두의 화면에 적용됩니다.":"이 브라우저에만 저장됩니다.";
+  $("pDesc").textContent=on?"저장하면 바로 적용됩니다 (다른 분은 새로고침).":"이 브라우저에만 저장됩니다.";
   $("btnMode").textContent=on?"내 키워드로 돌아가기":"기본값 편집";
   $("btnSave").textContent=on?"기본값 저장":"저장";
-  $("btnReset2").hidden=on||S.src==="default";$("btnTok").hidden=!on;
+  $("btnReset2").hidden=on||S.src!=="mine";$("btnTok").hidden=!on;
   updTok();
   if(on){DRAFT=readBoxes();$("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");}
   else{const d=DRAFT||curKW();$("kwInc").value=d.include.join("\n");$("kwExc").value=d.exclude.join("\n");DRAFT=null;TOKEN="";syncSrc();}
@@ -388,9 +398,13 @@ async function saveDefaults(){
         body:JSON.stringify({message:"기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
       if(put.ok){
         HEAD=y.split("filters:")[0];
-        applyDefaults(readBoxes());          // 바로 화면에 반영
-        msg.textContent="저장됨 — 바로 적용되었습니다 (다른 분은 새로고침하면 보입니다)";
-        setTimeout(()=>msg.textContent="",7000);
+        const before=countNow();
+        applyDefaults(readBoxes(),false);    // 편집 칸은 두고 목록만 즉시 갱신
+        const after=countNow();
+        msg.textContent=S.src==="default"
+          ? `저장됨 — 바로 적용 (${before}건 → ${after}건). 다른 분은 새로고침하면 보입니다`
+          : "저장됨 — 다만 지금 화면은 [내 키워드]를 쓰는 중이라 목록은 그대로입니다";
+        setTimeout(()=>msg.textContent="",8000);
         return;
       }
       lastErr="("+put.status+") "+(await put.text()).slice(0,100);
@@ -404,9 +418,11 @@ async function saveDefaults(){
     download(y);
   }
 }
-function applyDefaults(kw){
+function applyDefaults(kw,refill=true){
   DEFAULT_KW.include=kw.include.slice(); DEFAULT_KW.exclude=kw.exclude.slice();
-  if(S.src==="default"&&!ADMIN){fillKw();judgeAll();render();}   // 기본값을 쓰는 사람만 갱신
+  if(S.src!=="default")return;                 // 내 키워드를 쓰는 중이면 목록은 그대로
+  if(refill&&!ADMIN)fillKw();
+  judgeAll();render();syncUI();
 }
 /* 페이지를 열 때 최신 기본값을 GitHub 에서 직접 읽어옴 (수집을 기다리지 않아도 반영) */
 (async()=>{
