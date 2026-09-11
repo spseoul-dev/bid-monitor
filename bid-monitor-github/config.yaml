@@ -42,7 +42,7 @@ institutions:
 filters:
   include_keywords:
     - 기본계획
-    - 실시설계
+    - 설계
     - 정비계획
   exclude_keywords:
     - 시공
