@@ -237,6 +237,7 @@ function counts(){
   $("total").textContent=DATA.length.toLocaleString();
 }
 
+function countNow(){return DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).length;}
 function render(){
   counts();
   const rows=DATA.filter(n=>base(n)&&inView(n,S.view)&&hasTag(n,S.tag)).sort((a,b)=>(b.notice_date||"").localeCompare(a.notice_date||""));
@@ -298,8 +299,13 @@ const togglePanel=()=>{$("panel").classList.toggle("open");};
 $("btnKw").onclick=togglePanel;$("btnKw2").onclick=togglePanel;$("btnClose").onclick=()=>{if(ADMIN)setMode(false);$("panel").classList.remove("open");};
 $("btnSave").onclick=()=>{
   if(ADMIN){saveDefaults();return;}
-  MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);judgeAll();update();
-  $("kwMsg").textContent="내 키워드로 저장됨 — 바꾸기 전까지 계속 적용됩니다";setTimeout(()=>$("kwMsg").textContent="",4000);
+  const before=countNow();
+  MYKW=readBoxes();save(LS_KW,MYKW);S.src="mine";save(LS_S,S);
+  judgeAll();render();syncUI();save(LS_S,S);
+  const after=countNow();
+  $("kwMsg").className="msg";
+  $("kwMsg").textContent=`내 키워드로 저장됨 — ${before}건 → ${after}건`;
+  setTimeout(()=>$("kwMsg").textContent="",5000);
 };
 $("btnReset2").onclick=()=>{
   $("kwInc").value=DEFAULT_KW.include.join("\n");$("kwExc").value=DEFAULT_KW.exclude.join("\n");
@@ -392,9 +398,13 @@ async function saveDefaults(){
         body:JSON.stringify({message:"기본값 수정 (페이지에서)",content:b64(y),sha,branch:"main"})});
       if(put.ok){
         HEAD=y.split("filters:")[0];
+        const before=countNow();
         applyDefaults(readBoxes(),false);    // 편집 칸은 두고 목록만 즉시 갱신
-        msg.textContent="저장됨 — 바로 적용되었습니다 (다른 분은 새로고침하면 보입니다)";
-        setTimeout(()=>msg.textContent="",7000);
+        const after=countNow();
+        msg.textContent=S.src==="default"
+          ? `저장됨 — 바로 적용 (${before}건 → ${after}건). 다른 분은 새로고침하면 보입니다`
+          : "저장됨 — 다만 지금 화면은 [내 키워드]를 쓰는 중이라 목록은 그대로입니다";
+        setTimeout(()=>msg.textContent="",8000);
         return;
       }
       lastErr="("+put.status+") "+(await put.text()).slice(0,100);
@@ -410,9 +420,9 @@ async function saveDefaults(){
 }
 function applyDefaults(kw,refill=true){
   DEFAULT_KW.include=kw.include.slice(); DEFAULT_KW.exclude=kw.exclude.slice();
-  if(S.src!=="default")return;                 // 내 키워드를 쓰는 사람은 그대로
-  if(refill&&!ADMIN)fillKw();                  // 편집 중인 칸은 건드리지 않음
-  judgeAll();render();                         // 목록은 즉시 다시 걸러냄
+  if(S.src!=="default")return;                 // 내 키워드를 쓰는 중이면 목록은 그대로
+  if(refill&&!ADMIN)fillKw();
+  judgeAll();render();syncUI();
 }
 /* 페이지를 열 때 최신 기본값을 GitHub 에서 직접 읽어옴 (수집을 기다리지 않아도 반영) */
 (async()=>{
