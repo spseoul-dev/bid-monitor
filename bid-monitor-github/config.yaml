@@ -59,6 +59,7 @@ filters:
     - 종합계획
   exclude_keywords:
     - 시공
+    - 공사
     - 측량
     - 내진
     - 전기
