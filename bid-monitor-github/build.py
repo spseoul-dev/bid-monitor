@@ -21,7 +21,7 @@ from pathlib import Path
 
 from bidmon.config import load_config, ROOT
 from bidmon.filters import tag_institutions, categorize
-from bidmon.collectors import G2BCollector, G2BPrespecCollector
+from bidmon.collectors import G2BCollector, G2BPrespecCollector, LHCollector
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("build")
@@ -57,6 +57,11 @@ def main():
     collectors = [G2BCollector(cfg["g2b"])]
     if (cfg.get("g2b_prespec") or {}).get("enabled"):
         collectors.append(G2BPrespecCollector({**cfg["g2b"], **cfg["g2b_prespec"]}))
+    lh_cfg = cfg.get("lh") or {}
+    if lh_cfg.get("enabled", True):          # config.yaml 에 lh 항목이 없어도 기본 켜짐
+        lh = LHCollector(lh_cfg)
+        lh.known = set(prev)                 # 이미 페이지에 있는 공고는 상세 조회 생략
+        collectors.append(lh)
     notices = []
     for c in collectors:
         notices += c.safe_collect(days)
@@ -70,6 +75,10 @@ def main():
         tag_institutions(n, cfg["institutions"])
         categorize(n)
         d = {k: getattr(n, k) for k in KEEP}
+        old = prev.get(n.key) or {}
+        for k in ("notice_date", "estimated_price", "budget", "demand_institution"):
+            if not d.get(k) and old.get(k):  # 이번에 비어 있으면 이전 값 유지 (LH 상세 생략 시)
+                d[k] = old[k]
         d["first_seen"] = seen.setdefault(n.key, today)
         prev[n.key] = d          # 새 정보로 덮어씀 (변경공고 반영)
 
