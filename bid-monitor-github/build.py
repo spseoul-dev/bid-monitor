@@ -21,7 +21,7 @@ from pathlib import Path
 
 from bidmon.config import load_config, ROOT
 from bidmon.filters import tag_institutions, categorize
-from bidmon.collectors import G2BCollector, G2BPrespecCollector, LHCollector
+from bidmon.collectors import G2BCollector, G2BPrespecCollector, LHCollector, LHBoardCollector
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("build")
@@ -62,6 +62,11 @@ def main():
         lh = LHCollector(lh_cfg)
         lh.known = set(prev)                 # 이미 페이지에 있는 공고는 상세 조회 생략
         collectors.append(lh)
+    lb_cfg = cfg.get("lh_board") or {}
+    if lb_cfg.get("enabled", True):          # LH 홈페이지 공모·공고 게시판 (설계공모 등)
+        lb = LHBoardCollector(lb_cfg)
+        lb.known = set(prev)
+        collectors.append(lb)
     notices = []
     for c in collectors:
         notices += c.safe_collect(days)
